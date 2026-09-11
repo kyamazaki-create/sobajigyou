@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "shiryo-kanri",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shiryo-kanri",
+      "database_id": "9cc2e9e2-6192-4497-be58-74b7235fadc8"
+    }
+  ],
+  "kv_namespaces": [
+    { "binding": "FILES", "id": "46071696a03846ef955c2d8ddf3af37b" }
+  ],
+  "observability": { "enabled": true }
+}
