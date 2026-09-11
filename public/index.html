@@ -266,20 +266,59 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 .login-card input:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px rgba(189,139,64,.14)}
 .login-card .btn{width:100%;justify-content:center}
 
-@media (max-width:900px){
-  .app{grid-template-columns:1fr}
-  .side{position:static;height:auto}
-  .me-box{margin-top:0}
+/* mobile drawer chrome (hidden on desktop) */
+.hamburger{display:none;place-items:center;width:42px;height:42px;border-radius:11px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);flex:none}
+.hamburger:hover{border-color:var(--gold);color:var(--gold-ink)}
+#scrim{position:fixed;inset:0;background:rgba(22,39,60,.45);z-index:110}
+#scrim[hidden]{display:none}
+
+/* tablet */
+@media (max-width:1000px){
+  .app{grid-template-columns:220px 1fr}
   .tiles{grid-template-columns:1fr 1fr}
   .dash-grid{grid-template-columns:1fr}
-  .content{padding:20px 16px 50px}
-  .topbar{padding:15px 16px}
-  .fs-card{grid-template-columns:1fr}
-  .fs-left{padding:32px 28px}
-  .fs-left h2{font-size:30px}
-  .fs-right{padding:32px 26px}
-  .fs-row{grid-template-columns:1fr}
-  .fs-header,.fs-crumb,.fs-wrap{padding-left:18px;padding-right:18px}
+}
+/* phone */
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;top:0;left:0;height:100dvh;width:min(286px,86vw);transform:translateX(-100%);transition:transform .25s ease;z-index:120;box-shadow:var(--shadow-lg)}
+  .side.open{transform:translateX(0)}
+  .hamburger{display:inline-grid}
+  .topbar{padding:13px 16px;gap:12px;align-items:center}
+  .topbar h2{font-size:18px}
+  .topbar .tt-eb{display:none}
+  .topbar .desc{display:none}
+  .search{order:3;width:100%;margin-left:0}
+  .search input{width:100%;max-width:none}
+  #primary-add{margin-left:auto}
+  .content{padding:18px 15px 72px}
+  .tiles{gap:12px}
+  .tile{padding:15px 16px}
+  .tile .v{font-size:28px}
+  .mgrid{grid-template-columns:1fr;gap:14px}
+  .modal{border-radius:16px}
+  .modal-body,.modal-head{padding-left:18px;padding-right:18px}
+  .overlay{padding:3vh 10px 30px}
+  .fs-header{padding:16px 16px 0}
+  .fs-header h1{font-size:14px}
+  .fs-header .av{width:36px;height:36px}
+  .fs-crumb{padding:16px 16px 0;font-size:12px}
+  .fs-wrap{padding:16px 14px 50px}
+  .fs-card{grid-template-columns:1fr;border-radius:20px;min-height:0}
+  .fs-left{padding:28px 24px}
+  .fs-left h2{font-size:27px}
+  .fs-left p{max-width:none}
+  .fs-left::before,.fs-left::after{display:none}
+  .fs-right{padding:28px 22px}
+  .fs-right .plus{display:none}
+  .fs-right h2{font-size:25px}
+  .fs-row{grid-template-columns:1fr;gap:0}
+  .fs-foot{flex-wrap:wrap}
+  .fs-foot .btn{flex:1;justify-content:center}
+}
+@media (max-width:400px){
+  .tiles{grid-template-columns:1fr 1fr;gap:10px}
+  .tile .v{font-size:24px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -308,6 +347,7 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 
   <main class="main">
     <div class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="メニューを開く"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <div style="flex:1;min-width:0">
         <div class="tt-eb" id="view-eb">DASHBOARD</div>
         <h2 id="view-title">ダッシュボード</h2>
@@ -334,6 +374,7 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
   </form>
 </div>
 
+<div id="scrim" hidden></div>
 <div class="overlay" id="overlay" hidden><div id="modal-root"></div></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -402,7 +443,9 @@ function bindStatic(){
   $("#logout").addEventListener("click",async()=>{ try{await api("POST","/logout");}catch{} showLogin(); });
   $("#search").addEventListener("input",e=>{state.q=e.target.value.trim();render();});
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal();});
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(state.formOpen)closeForm();else if(!state.loginMode)closeModal();}});
+  $("#hamburger").addEventListener("click",openDrawer);
+  $("#scrim").addEventListener("click",closeDrawer);
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(state.formOpen)closeForm();else if(!$("#overlay").hidden)closeModal();else closeDrawer();}});
   $("#login-form").addEventListener("submit",doLogin);
 }
 async function doLogin(e){
@@ -416,7 +459,9 @@ async function doLogin(e){
   }catch(ex){ err.textContent=ex.message; }
   finally{ btn.disabled=false;btn.textContent="ログイン"; }
 }
-function setView(v){state.view=v;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.view===v));render();}
+function setView(v){state.view=v;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.view===v));closeDrawer();render();}
+function openDrawer(){document.querySelector(".side").classList.add("open");$("#scrim").hidden=false;}
+function closeDrawer(){const s=document.querySelector(".side");if(s)s.classList.remove("open");$("#scrim").hidden=true;}
 
 /* ---------- render ---------- */
 function render(){
@@ -445,7 +490,7 @@ function renderCats(){
   box.innerHTML=h;
   box.querySelectorAll("[data-pf]").forEach(b=>b.addEventListener("click",e=>{
     if(e.target.dataset.delcat){e.stopPropagation();confirmDelCat(e.target.dataset.delcat);return;}
-    state.pf=b.dataset.pf==="__all"?null:b.dataset.pf; if(state.view==="dashboard")setView("materials"); else render();
+    state.pf=b.dataset.pf==="__all"?null:b.dataset.pf; closeDrawer(); if(state.view==="dashboard")setView("materials"); else render();
   }));
 }
 
@@ -584,14 +629,14 @@ function wireContent(){
 }
 
 /* ---------- modal core ---------- */
-function openModal(html){$("#modal-root").innerHTML=html;$("#overlay").hidden=false;const x=$("#modal-root .x");if(x)x.onclick=closeModal;}
+function openModal(html){closeDrawer();$("#modal-root").innerHTML=html;$("#overlay").hidden=false;const x=$("#modal-root .x");if(x)x.onclick=closeModal;}
 function closeModal(){$("#overlay").hidden=true;$("#modal-root").innerHTML="";state.openMat=null;}
 function optProjects(sel){return `<option value="">未分類</option>`+state.projects.map(p=>`<option value="${p.id}" ${sel===p.id?"selected":""}>${esc(p.name)}</option>`).join("");}
 function optMaterials(sel){return `<option value="">（なし）</option>`+state.materials.map(m=>`<option value="${m.id}" ${sel===m.id?"selected":""}>${esc(m.title)}</option>`).join("");}
 async function ensureMe(){ if(state.me) return true; await promptName(); return !!state.me; }
 
 /* ---------- full-screen form core ---------- */
-function openForm(html){ $("#formscreen").innerHTML=html; $("#formscreen").hidden=false; state.formOpen=true; window.scrollTo(0,0); }
+function openForm(html){ closeDrawer(); $("#formscreen").innerHTML=html; $("#formscreen").hidden=false; state.formOpen=true; window.scrollTo(0,0); }
 function closeForm(){ $("#formscreen").hidden=true; $("#formscreen").innerHTML=""; state.formOpen=false; }
 function fsHeader(crumbCur){
   return `<div class="fs-header">
