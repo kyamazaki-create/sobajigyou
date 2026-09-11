@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   assignee    TEXT,
   due         TEXT,
   status      TEXT,
+  priority    TEXT DEFAULT '通常',
   project_id  TEXT,
   material_id TEXT,
   note        TEXT,

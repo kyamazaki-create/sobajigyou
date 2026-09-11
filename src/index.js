@@ -162,13 +162,13 @@ async function route(req, env, url) {
     const b = await req.json();
     const now = nowISO();
     if (b.id) {
-      await DB.prepare("UPDATE tasks SET title=?,assignee=?,due=?,status=?,project_id=?,material_id=?,note=?,updated_at=? WHERE id=?")
-        .bind(b.title || "無題", b.assignee || "", b.due || "", b.status || "未着手", b.projectId || "", b.materialId || "", b.note || "", now, b.id).run();
+      await DB.prepare("UPDATE tasks SET title=?,assignee=?,due=?,status=?,priority=?,project_id=?,material_id=?,note=?,updated_at=? WHERE id=?")
+        .bind(b.title || "無題", b.assignee || "", b.due || "", b.status || "未着手", b.priority || "通常", b.projectId || "", b.materialId || "", b.note || "", now, b.id).run();
       return json({ id: b.id });
     }
     const id = uid();
-    await DB.prepare("INSERT INTO tasks (id,title,assignee,due,status,project_id,material_id,note,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
-      .bind(id, b.title || "無題", b.assignee || "", b.due || "", b.status || "未着手", b.projectId || "", b.materialId || "", b.note || "", b.by || "", now, now).run();
+    await DB.prepare("INSERT INTO tasks (id,title,assignee,due,status,priority,project_id,material_id,note,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(id, b.title || "無題", b.assignee || "", b.due || "", b.status || "未着手", b.priority || "通常", b.projectId || "", b.materialId || "", b.note || "", b.by || "", now, now).run();
     return json({ id });
   }
   let tm = p.match(/^\/api\/tasks\/([^/]+)$/);
@@ -243,7 +243,7 @@ async function getState(DB) {
     })),
     tasks: tasks.results.map((t) => ({
       id: t.id, title: t.title, assignee: t.assignee, due: t.due, status: t.status,
-      projectId: t.project_id, materialId: t.material_id, note: t.note,
+      priority: t.priority || "通常", projectId: t.project_id, materialId: t.material_id, note: t.note,
       createdBy: t.created_by, createdAt: t.created_at, updatedAt: t.updated_at,
     })),
   });

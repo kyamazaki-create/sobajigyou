@@ -3,242 +3,283 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>資料・タスク管理台帳</title>
+<title>MIKASOL 事業管理ワークスペース</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Zen+Kaku+Gothic+Antique:wght@700;900&display=swap">
 <style>
 :root{
-  --ground:#f4f6f4; --surface:#ffffff; --surface-2:#f8faf8;
-  --ink:#1a211f; --muted:#5f6b66; --faint:#8a938e;
-  --line:#e2e7e3; --line-strong:#d3dad5;
-  --accent:#107569; --accent-ink:#0b5750; --accent-soft:#e2f1ee;
-  --ok:#15803d; --ok-soft:#e5f3ea;
-  --warn:#b45309; --warn-soft:#fbf0e0;
-  --danger:#c2410c; --danger-soft:#fbe8df;
-  --info:#1d6fb8; --info-soft:#e5eff8;
-  --shadow:0 1px 2px rgba(20,30,26,.04),0 6px 20px rgba(20,30,26,.06);
-  --shadow-lg:0 8px 40px rgba(20,30,26,.18);
-  --r:12px; --r-sm:8px;
+  --surface:#ffffff; --surface-2:#faf6ee; --surface-3:#f5efe3;
+  --navy:#16273c; --navy-2:#22354e; --navy-line:rgba(255,255,255,.10);
+  --ink:#16273c; --body:#5d574b; --muted:#8b8374; --faint:#aca493;
+  --line:#e8e0cf; --line-strong:#dccfb6;
+  --gold:#bd8b40; --gold-ink:#9a6c26; --gold-soft:#f3e7cd; --gold-bright:#d8b46a;
+  --ok:#3f7d54; --ok-soft:#e7f0e8;
+  --warn:#b07d2e; --warn-soft:#f6ead1;
+  --danger:#b2482f; --danger-soft:#f6e1d9;
+  --info:#3a5f86; --info-soft:#e7edf4;
+  --shadow:0 1px 2px rgba(40,30,10,.05),0 8px 26px rgba(40,30,10,.07);
+  --shadow-lg:0 20px 60px rgba(22,39,60,.28);
+  --r:16px; --r-sm:10px; --r-lg:26px;
   --sans:"Noto Sans JP",system-ui,-apple-system,sans-serif;
   --disp:"Zen Kaku Gothic New","Noto Sans JP",system-ui,sans-serif;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ground:#121615; --surface:#1a201e; --surface-2:#202724;
-  --ink:#e9efeb; --muted:#a3ada8; --faint:#79837e;
-  --line:#2b332f; --line-strong:#39423d;
-  --accent:#2bb3a3; --accent-ink:#5fd3c5; --accent-soft:#173330;
-  --ok:#4ade80; --ok-soft:#16281d;
-  --warn:#fbbf68; --warn-soft:#2e2413;
-  --danger:#fb9a6b; --danger-soft:#2e1c13;
-  --info:#6bb6f0; --info-soft:#122334;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-  --shadow-lg:0 8px 40px rgba(0,0,0,.5);
-}}
-:root[data-theme="dark"]{
-  --ground:#121615; --surface:#1a201e; --surface-2:#202724;
-  --ink:#e9efeb; --muted:#a3ada8; --faint:#79837e;
-  --line:#2b332f; --line-strong:#39423d;
-  --accent:#2bb3a3; --accent-ink:#5fd3c5; --accent-soft:#173330;
-  --ok:#4ade80; --ok-soft:#16281d;
-  --warn:#fbbf68; --warn-soft:#2e2413;
-  --danger:#fb9a6b; --danger-soft:#2e1c13;
-  --info:#6bb6f0; --info-soft:#122334;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-  --shadow-lg:0 8px 40px rgba(0,0,0,.5);
+  --disp-heavy:"Zen Kaku Gothic Antique","Zen Kaku Gothic New","Noto Sans JP",sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:14px}
+body{color:var(--body);font-family:var(--sans);line-height:1.7;font-size:14px;
+  background:linear-gradient(140deg,#f5efe3 0%,#efe6d4 55%,#ece0cb 100%);background-attachment:fixed;min-height:100vh}
 img{max-width:100%}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:14px}
-h1,h2,h3{font-family:var(--disp);margin:0;text-wrap:balance;letter-spacing:.01em}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1,h2,h3,h4{font-family:var(--disp);margin:0;color:var(--ink);text-wrap:balance;letter-spacing:.01em}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
 .tnum{font-variant-numeric:tabular-nums}
 [hidden]{display:none!important}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--gold-ink);text-transform:uppercase}
 
-.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
-.side{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
-.brand{padding:20px 20px 14px;display:flex;align-items:center;gap:10px}
-.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff;flex:none}
-.brand h1{font-size:15px;line-height:1.25}
-.brand .sub{font-size:11px;color:var(--faint);letter-spacing:.04em}
-.nav{padding:6px 12px;display:flex;flex-direction:column;gap:2px}
-.nav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:9px 12px;border-radius:var(--r-sm);font-size:13.5px;font-weight:500}
-.nav button:hover{background:var(--surface-2);color:var(--ink)}
-.nav button.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
-.nav button .ct{margin-left:auto;font-size:11px;color:var(--faint);font-weight:500}
-.nav button.on .ct{color:var(--accent-ink)}
-.sec-label{padding:16px 20px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--faint);display:flex;align-items:center;justify-content:space-between}
-.sec-label button{background:none;border:none;color:var(--accent);font-size:16px;line-height:1;padding:0 4px;border-radius:6px}
-.sec-label button:hover{background:var(--accent-soft)}
-.cats{padding:0 12px 12px;display:flex;flex-direction:column;gap:1px}
-.cat{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:7px 12px;border-radius:var(--r-sm);font-size:13px}
-.cat:hover{background:var(--surface-2);color:var(--ink)}
-.cat.on{background:var(--surface-2);color:var(--ink);font-weight:700}
+/* ---------- app shell ---------- */
+.app{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+.side{background:var(--navy);color:#cfd6e0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{padding:24px 22px 18px;display:flex;align-items:center;gap:12px}
+.brand .logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(150deg,#d8b46a,#bd8b40);display:grid;place-items:center;color:#16273c;flex:none;font-family:var(--disp-heavy);font-weight:900;font-size:22px;box-shadow:0 6px 16px rgba(189,139,64,.35)}
+.brand .bt .eb{font-size:9.5px;font-weight:700;letter-spacing:.16em;color:var(--gold-bright);text-transform:uppercase}
+.brand .bt h1{font-size:15px;line-height:1.3;color:#fff;font-family:var(--disp);font-weight:700;margin-top:2px}
+.nav{padding:10px 14px;display:flex;flex-direction:column;gap:3px}
+.nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:none;color:#aeb6c2;padding:10px 13px;border-radius:11px;font-size:13.5px;font-weight:500;position:relative}
+.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav button.on{background:rgba(216,180,106,.14);color:var(--gold-bright);font-weight:700}
+.nav button.on::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:var(--gold-bright)}
+.nav button .ct{margin-left:auto;font-size:11px;color:#7f889a;font-weight:600}
+.nav button.on .ct{color:var(--gold-bright)}
+.sec-label{padding:20px 22px 8px;font-size:10.5px;font-weight:700;letter-spacing:.14em;color:#7f889a;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.sec-label button{background:none;border:none;color:var(--gold-bright);font-size:17px;line-height:1;padding:0 4px;border-radius:6px}
+.sec-label button:hover{background:rgba(255,255,255,.08)}
+.cats{padding:0 14px 12px;display:flex;flex-direction:column;gap:1px}
+.cat{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;color:#aeb6c2;padding:8px 13px;border-radius:10px;font-size:13px}
+.cat:hover{background:rgba(255,255,255,.06);color:#fff}
+.cat.on{background:rgba(255,255,255,.09);color:#fff;font-weight:700}
 .cat .dot{width:9px;height:9px;border-radius:3px;flex:none}
-.cat .ct{margin-left:auto;font-size:11px;color:var(--faint)}
-.cat .del{margin-left:6px;opacity:0;border:none;background:none;color:var(--faint);font-size:14px;line-height:1;padding:2px}
+.cat .ct{margin-left:auto;font-size:11px;color:#7f889a}
+.cat .del{margin-left:6px;opacity:0;border:none;background:none;color:#7f889a;font-size:15px;line-height:1;padding:2px}
 .cat:hover .del{opacity:1}
 .cat .del:hover{color:var(--danger)}
-.me-box{margin-top:auto;border-top:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
-.me-box .lbl{font-size:11px;color:var(--faint);letter-spacing:.04em}
-.me-box .who{display:flex;align-items:center;gap:8px}
-.me-box .who .av{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
-.me-box .who span{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.me-box .who button{margin-left:auto;background:none;border:none;color:var(--accent);font-size:11px}
-.me-box .logout{background:none;border:none;color:var(--faint);font-size:11px;text-align:left;padding:0;margin-top:2px}
-.me-box .logout:hover{color:var(--danger)}
+.me-box{margin-top:auto;border-top:1px solid var(--navy-line);padding:16px 18px;display:flex;flex-direction:column;gap:7px}
+.me-box .lbl{font-size:10px;color:#7f889a;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.me-box .who{display:flex;align-items:center;gap:9px}
+.me-box .who .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(150deg,#d8b46a,#bd8b40);color:#16273c;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.me-box .who span{font-size:13px;font-weight:500;color:#e6e9ee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me-box .who button{margin-left:auto;background:none;border:none;color:var(--gold-bright);font-size:11px}
+.me-box .logout{background:none;border:none;color:#7f889a;font-size:11px;text-align:left;padding:0}
+.me-box .logout:hover{color:#e6a08a}
 
 .main{display:flex;flex-direction:column;min-width:0}
-.topbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--ground) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:16px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.topbar h2{font-size:19px}
-.topbar .desc{font-size:12.5px;color:var(--muted);width:100%;margin-top:-6px}
+.topbar{position:sticky;top:0;z-index:5;background:rgba(245,239,227,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:18px 30px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.topbar .tt-eb{font-size:10.5px;font-weight:700;letter-spacing:.16em;color:var(--gold-ink);text-transform:uppercase}
+.topbar h2{font-size:21px;font-weight:700;line-height:1.2;margin-top:1px}
+.topbar .desc{font-size:12.5px;color:var(--muted);width:100%}
 .search{margin-left:auto;position:relative}
-.search input{width:230px;max-width:40vw;padding:9px 12px 9px 34px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--ink)}
-.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--faint)}
-.btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:9px 15px;border-radius:var(--r-sm);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
-.btn:hover{border-color:var(--accent);color:var(--accent-ink)}
-.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.pri:hover{background:var(--accent-ink);color:#fff}
-.btn.sm{padding:6px 11px;font-size:12px}
+.search input{width:240px;max-width:42vw;padding:10px 14px 10px 36px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--ink)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--faint)}
+.btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:10px 16px;border-radius:var(--r-sm);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:var(--gold);color:var(--gold-ink)}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.pri:hover{background:#0f1d30;color:#fff}
+.btn.gold{background:linear-gradient(150deg,#d8b46a,#bd8b40);border:none;color:#16273c}
+.btn.gold:hover{filter:brightness(1.05);color:#16273c}
+.btn.sm{padding:7px 12px;font-size:12px}
 .btn.ghost{border-color:transparent;background:none;color:var(--muted)}
-.btn.ghost:hover{background:var(--surface-2);color:var(--ink)}
+.btn.ghost:hover{background:rgba(22,39,60,.05);color:var(--ink)}
 .btn.danger{color:var(--danger);border-color:transparent}
 .btn.danger:hover{background:var(--danger-soft);border-color:var(--danger)}
 .btn:disabled{opacity:.5;cursor:default}
-.content{padding:24px 28px 60px;max-width:1180px;width:100%}
+.content{padding:26px 30px 64px;max-width:1200px;width:100%}
 
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
-.tile .k{font-size:12px;color:var(--muted);font-weight:500}
-.tile .v{font-family:var(--disp);font-size:30px;font-weight:700;line-height:1.1;margin-top:6px}
-.tile.alert .v{color:var(--danger)}
-.tile.warn .v{color:var(--warn)}
-.dash-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+/* ---------- dashboard ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.tile::after{content:"";position:absolute;right:-16px;top:-16px;width:60px;height:60px;border-radius:50%;background:var(--surface-3);opacity:.7}
+.tile .k{font-size:12px;color:var(--muted);font-weight:600;position:relative}
+.tile .v{font-family:var(--disp-heavy);font-size:34px;font-weight:900;line-height:1;margin-top:8px;color:var(--ink);position:relative}
+.tile.alert .v{color:var(--danger)} .tile.warn .v{color:var(--gold-ink)}
+.dash-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
-.panel h3{font-size:14px;padding:15px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
-.panel h3 .ct{margin-left:auto;font-size:12px;color:var(--faint);font-weight:500}
-.panel .body{padding:8px 8px}
-.empty{padding:34px 20px;text-align:center;color:var(--faint);font-size:13px}
+.panel h3{font-size:14px;font-weight:700;padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.panel h3 .ct{margin-left:auto;font-size:12px;color:var(--faint);font-weight:600}
+.panel .body{padding:9px 9px}
+.empty{padding:38px 20px;text-align:center;color:var(--faint);font-size:13px}
 
-.trow{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-sm)}
+.trow{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:var(--r-sm)}
 .trow:hover{background:var(--surface-2)}
-.trow .tt{font-weight:500;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .tt{font-weight:500;font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .meta{font-size:11.5px;color:var(--muted);display:flex;gap:10px;margin-top:2px;flex-wrap:wrap;align-items:center}
 .trow .grow{min-width:0;flex:1}
 .due{font-weight:700;font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
 .due.over{color:var(--danger)} .due.soon{color:var(--warn)} .due.ok{color:var(--muted)} .due.done{color:var(--faint)}
 .due .flag{width:6px;height:6px;border-radius:50%;background:currentColor}
 
-.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap}
-.pill.st-未着手{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-strong)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill.st-未着手{background:var(--surface-3);color:var(--muted);border:1px solid var(--line-strong)}
 .pill.st-進行中{background:var(--info-soft);color:var(--info)}
 .pill.st-完了{background:var(--ok-soft);color:var(--ok)}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:500;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.pri-dot{width:9px;height:9px;border-radius:3px;flex:none;display:inline-block}
+.pri-最優先{background:var(--danger)} .pri-高{background:var(--gold)} .pri-通常{background:var(--faint)} .pri-低{background:#c9c2b1}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:var(--surface-3);color:var(--muted);border:1px solid var(--line)}
 .chip .dot{width:8px;height:8px;border-radius:3px}
-.av-mini{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:inline-grid;place-items:center;font-size:10.5px;font-weight:700;flex:none}
+.av-mini{width:22px;height:22px;border-radius:50%;background:var(--gold-soft);color:var(--gold-ink);display:inline-grid;place-items:center;font-size:10.5px;font-weight:700;flex:none}
 
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 17px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:border-color .15s,transform .15s}
-.mcard:hover{border-color:var(--accent);transform:translateY(-2px)}
-.mcard .top{display:flex;align-items:flex-start;gap:10px}
-.mcard h3{font-size:15px;line-height:1.35;flex:1}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:18px}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 19px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s}
+.mcard:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 14px 34px rgba(40,30,10,.12)}
+.mcard h3{font-size:15.5px;line-height:1.35;font-weight:700}
 .mcard .mdesc{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mcard .foot{display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--faint);margin-top:auto;flex-wrap:wrap}
 .mcard .foot .g{display:inline-flex;align-items:center;gap:4px}
 .thumbs{display:flex;gap:6px;flex-wrap:wrap}
-.thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid var(--line);background:var(--surface-2)}
+.thumb{width:46px;height:46px;border-radius:8px;object-fit:cover;border:1px solid var(--line);background:var(--surface-2)}
 .thumb.ic{display:grid;place-items:center;color:var(--muted)}
 
 .tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow-x:auto}
-table.tasks{width:100%;border-collapse:collapse;min-width:720px}
-table.tasks th{text-align:left;font-size:11px;letter-spacing:.05em;color:var(--faint);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+table.tasks{width:100%;border-collapse:collapse;min-width:760px}
+table.tasks th{text-align:left;font-size:10.5px;letter-spacing:.06em;color:var(--faint);font-weight:700;padding:13px 15px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2);text-transform:uppercase}
 table.tasks th.sortable{cursor:pointer;user-select:none}
 table.tasks th.sortable:hover{color:var(--ink)}
-table.tasks td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+table.tasks td{padding:13px 15px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
 table.tasks tr:last-child td{border-bottom:none}
 table.tasks tbody tr{cursor:pointer}
 table.tasks tbody tr:hover{background:var(--surface-2)}
-.t-title{font-weight:500}
-.t-link{font-size:11px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px;margin-top:3px}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
-.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px}
-.seg button{border:none;background:none;padding:6px 13px;border-radius:999px;font-size:12.5px;font-weight:500;color:var(--muted)}
-.seg button.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
+.t-title{font-weight:500;color:var(--ink);display:flex;align-items:center;gap:8px}
+.t-link{font-size:11px;color:var(--gold-ink);display:inline-flex;align-items:center;gap:4px;margin-top:3px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:none;background:none;padding:7px 15px;border-radius:999px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.seg button.on{background:var(--navy);color:#fff;font-weight:700}
 
-.overlay{position:fixed;inset:0;background:rgba(15,22,20,.5);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px 40px;z-index:50;overflow-y:auto}
+/* ---------- modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(22,39,60,.5);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 40px;z-index:70;overflow-y:auto}
 .overlay[hidden]{display:none}
-.modal{background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:560px;border:1px solid var(--line);animation:pop .18s ease}
-.modal.wide{max-width:720px}
-@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
-.modal-head{padding:20px 24px 14px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line)}
-.modal-head h2{font-size:18px;flex:1}
-.modal-head .x{background:none;border:none;font-size:22px;color:var(--faint);line-height:1;padding:2px 6px;border-radius:6px}
+.modal{background:var(--surface);border-radius:20px;box-shadow:var(--shadow-lg);width:100%;max-width:560px;border:1px solid var(--line);animation:pop .18s ease}
+.modal.wide{max-width:740px}
+@keyframes pop{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.modal-head{padding:22px 26px 15px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line)}
+.modal-head h2{font-size:18px;font-weight:700;flex:1}
+.modal-head .x{background:none;border:none;font-size:23px;color:var(--faint);line-height:1;padding:2px 6px;border-radius:6px}
 .modal-head .x:hover{background:var(--surface-2);color:var(--ink)}
-.modal-body{padding:20px 24px}
-.modal-foot{padding:14px 24px 20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.field{margin-bottom:15px}
-.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
-.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink)}
-.field textarea{resize:vertical;min-height:80px}
+.modal-body{padding:22px 26px}
+.modal-foot{padding:15px 26px 22px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+/* ---------- fields ---------- */
+.field{margin-bottom:18px}
+.field>label,.flabel{display:flex;align-items:center;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.flabel .req{color:var(--gold-ink);margin-left:4px}
+.flabel .opt{margin-left:auto;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.02em}
+.field input,.field select,.field textarea,.fs-field input,.fs-field select,.fs-field textarea{
+  width:100%;padding:12px 14px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink);transition:.15s}
+.field input:focus,.field select:focus,.field textarea:focus,.fs-field input:focus,.fs-field select:focus,.fs-field textarea:focus{
+  border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(189,139,64,.14);outline:none}
+.field textarea,.fs-field textarea{resize:vertical;min-height:84px;line-height:1.7}
 .field .row{display:flex;gap:12px}
 .field .row>*{flex:1}
-.hint{font-size:11.5px;color:var(--faint);margin-top:5px}
+.hint{font-size:11.5px;color:var(--faint);margin-top:6px}
 .err{font-size:12.5px;color:var(--danger);margin-top:8px;min-height:1em}
 
+/* ---------- full-screen form ---------- */
+.formscreen{position:fixed;inset:0;z-index:60;overflow-y:auto;
+  background:linear-gradient(140deg,#f5efe3 0%,#efe6d4 55%,#ece0cb 100%)}
+.formscreen[hidden]{display:none}
+.fs-header{display:flex;align-items:center;gap:14px;padding:22px 40px 0}
+.fs-header .logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(150deg,#d8b46a,#bd8b40);display:grid;place-items:center;color:#16273c;font-family:var(--disp-heavy);font-weight:900;font-size:22px;flex:none;box-shadow:0 6px 16px rgba(189,139,64,.3)}
+.fs-header .eb{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--gold-ink);text-transform:uppercase}
+.fs-header h1{font-size:16px;font-weight:700;line-height:1.3;margin-top:1px}
+.fs-header .sp{margin-left:auto}
+.fs-header .cancel{background:none;border:none;color:var(--muted);font-size:13.5px;font-weight:500;padding:8px 10px;border-radius:8px}
+.fs-header .cancel:hover{background:rgba(22,39,60,.05);color:var(--ink)}
+.fs-header .av{width:42px;height:42px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;margin-left:6px}
+.fs-crumb{padding:22px 40px 0;font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fs-crumb .sep{color:var(--faint)}
+.fs-crumb .cur{color:var(--ink);font-weight:700}
+.fs-wrap{padding:20px 40px 60px}
+.fs-card{max-width:1180px;margin:0 auto;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);overflow:hidden;display:grid;grid-template-columns:.82fr 1.18fr;min-height:520px}
+.fs-left{background:var(--navy);color:#cfd6e0;padding:44px 40px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.fs-left::before{content:"";position:absolute;right:-70px;top:60px;width:230px;height:230px;border-radius:50%;border:1px solid rgba(255,255,255,.06)}
+.fs-left::after{content:"";position:absolute;right:-120px;top:20px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(216,180,106,.12),transparent 70%)}
+.fs-left .tag{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.16em;color:var(--gold-bright);text-transform:uppercase;position:relative}
+.fs-left .tag .d{width:7px;height:7px;border-radius:50%;background:var(--gold-bright)}
+.fs-left h2{font-family:var(--disp-heavy);font-weight:900;font-size:38px;line-height:1.28;color:#fff;margin-top:22px;letter-spacing:.02em;position:relative}
+.fs-left p{font-size:13px;line-height:1.9;color:#a9b1bd;margin-top:20px;max-width:30ch;position:relative}
+.fs-left .foot{margin-top:auto;font-size:11.5px;color:#6f7889;position:relative;padding-top:24px}
+.fs-right{padding:44px 46px;position:relative}
+.fs-right .plus{position:absolute;right:40px;top:40px;width:46px;height:46px;border-radius:14px;background:var(--gold-soft);color:var(--gold-ink);display:grid;place-items:center;font-size:24px;font-weight:300}
+.fs-right .eb{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--gold-ink);text-transform:uppercase}
+.fs-right h2{font-size:30px;font-weight:900;font-family:var(--disp-heavy);line-height:1.2;margin-top:8px}
+.fs-right .sub{font-size:13px;color:var(--muted);margin-top:8px;margin-bottom:30px}
+.fs-field{margin-bottom:22px}
+.fs-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.fs-foot{display:flex;gap:12px;align-items:center;margin-top:30px;padding-top:24px;border-top:1px solid var(--line)}
+.fs-foot .spacer{flex:1}
+
+/* ---------- material detail sections ---------- */
 .md-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-.md-sec{margin-top:22px}
-.md-sec h4{font-size:13px;font-family:var(--disp);margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--ink)}
-.md-sec h4 .ct{color:var(--faint);font-weight:500;font-size:12px}
+.md-sec{margin-top:24px}
+.md-sec h4{font-size:13px;margin-bottom:11px;display:flex;align-items:center;gap:8px;color:var(--ink);font-weight:700}
+.md-sec h4 .ct{color:var(--faint);font-weight:600;font-size:12px}
 .att-list{display:flex;flex-direction:column;gap:8px}
-.att{display:flex;align-items:center;gap:11px;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2)}
-.att .ic{width:36px;height:36px;border-radius:7px;display:grid;place-items:center;flex:none;background:var(--surface);border:1px solid var(--line);color:var(--accent-ink);overflow:hidden}
+.att{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2)}
+.att .ic{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;flex:none;background:#fff;border:1px solid var(--line);color:var(--gold-ink);overflow:hidden}
 .att .ic img{width:100%;height:100%;object-fit:cover}
 .att .nm{flex:1;min-width:0}
 .att .nm a{color:var(--ink);font-weight:500;text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.att .nm a:hover{color:var(--accent-ink);text-decoration:underline}
+.att .nm a:hover{color:var(--gold-ink);text-decoration:underline}
 .att .nm .sub{font-size:11px;color:var(--faint)}
-.att .rm{background:none;border:none;color:var(--faint);font-size:16px;padding:4px}
+.att .rm{background:none;border:none;color:var(--faint);font-size:17px;padding:4px}
 .att .rm:hover{color:var(--danger)}
 .notes{display:flex;flex-direction:column;gap:10px}
 .note{display:flex;gap:10px}
 .note .av-mini{margin-top:2px}
-.note .bub{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;flex:1}
+.note .bub{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;flex:1}
 .note .bub .h{font-size:11.5px;color:var(--muted);margin-bottom:2px;display:flex;gap:8px}
 .note .bub .h b{color:var(--ink)}
 .note .bub .txt{font-size:13px;white-space:pre-wrap;word-break:break-word}
 .note-add{display:flex;gap:8px;margin-top:12px}
-.note-add textarea{flex:1;min-height:40px;padding:9px 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink);resize:vertical}
-.drop{border:1.5px dashed var(--line-strong);border-radius:var(--r-sm);padding:16px;text-align:center;color:var(--muted);font-size:12.5px;cursor:pointer;transition:.15s}
-.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
-.mini-task{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2)}
+.note-add textarea{flex:1;min-height:42px;padding:10px 13px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink);resize:vertical}
+.drop{border:1.5px dashed var(--line-strong);border-radius:var(--r-sm);padding:17px;text-align:center;color:var(--muted);font-size:12.5px;cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--gold);background:var(--gold-soft);color:var(--gold-ink)}
+.mini-task{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface-2)}
 .mini-task .grow{flex:1;min-width:0}
-.mini-task .tt{font-size:13px;font-weight:500}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:11px 20px;border-radius:999px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:80;animation:pop .2s;max-width:90vw}
+.mini-task .tt{font-size:13px;font-weight:500;color:var(--ink)}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--navy);color:#f4efe6;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:90;animation:pop .2s;max-width:90vw}
 .toast[hidden]{display:none}
-.loading{display:grid;place-items:center;padding:80px 20px;color:var(--faint);gap:14px}
-.spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+.loading{display:grid;place-items:center;padding:90px 20px;color:var(--faint);gap:14px}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* login */
-.login-screen{position:fixed;inset:0;background:var(--ground);display:grid;place-items:center;z-index:100;padding:20px}
-.login-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);padding:34px 32px;width:100%;max-width:380px;text-align:center}
-.login-card .logo{width:46px;height:46px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:#fff;margin:0 auto 16px}
-.login-card h1{font-size:19px;margin-bottom:4px}
-.login-card p{font-size:12.5px;color:var(--muted);margin:0 0 22px}
-.login-card input{width:100%;padding:12px 14px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink);text-align:center;margin-bottom:12px}
+/* ---------- login ---------- */
+.login-screen{position:fixed;inset:0;display:grid;place-items:center;z-index:100;padding:20px;
+  background:linear-gradient(140deg,#f5efe3,#ece0cb)}
+.login-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-lg);padding:40px 36px;width:100%;max-width:390px;text-align:center}
+.login-card .logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(150deg,#d8b46a,#bd8b40);display:grid;place-items:center;color:#16273c;margin:0 auto 18px;font-family:var(--disp-heavy);font-weight:900;font-size:28px;box-shadow:0 8px 20px rgba(189,139,64,.3)}
+.login-card .eb{font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--gold-ink);text-transform:uppercase}
+.login-card h1{font-size:20px;font-weight:700;margin:4px 0 4px}
+.login-card p{font-size:12.5px;color:var(--muted);margin:0 0 24px}
+.login-card input{width:100%;padding:13px 15px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);color:var(--ink);text-align:center;margin-bottom:12px}
+.login-card input:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px rgba(189,139,64,.14)}
 .login-card .btn{width:100%;justify-content:center}
 
-@media (max-width:860px){
+@media (max-width:900px){
   .app{grid-template-columns:1fr}
   .side{position:static;height:auto}
   .me-box{margin-top:0}
   .tiles{grid-template-columns:1fr 1fr}
   .dash-grid{grid-template-columns:1fr}
-  .content{padding:18px 16px 50px}
-  .topbar{padding:14px 16px}
+  .content{padding:20px 16px 50px}
+  .topbar{padding:15px 16px}
+  .fs-card{grid-template-columns:1fr}
+  .fs-left{padding:32px 28px}
+  .fs-left h2{font-size:30px}
+  .fs-right{padding:32px 26px}
+  .fs-row{grid-template-columns:1fr}
+  .fs-header,.fs-crumb,.fs-wrap{padding-left:18px;padding-right:18px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -248,8 +289,8 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 <div class="app" id="app" hidden>
   <aside class="side">
     <div class="brand">
-      <div class="logo"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg></div>
-      <div><h1>資料・タスク管理台帳</h1><div class="sub">社内共有ワークスペース</div></div>
+      <div class="logo">蕎</div>
+      <div class="bt"><div class="eb">MIKASOL SOBAPROJECT</div><h1>事業管理ワークスペース</h1></div>
     </div>
     <nav class="nav" id="nav">
       <button data-view="dashboard" class="on"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>ダッシュボード</button>
@@ -259,7 +300,7 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
     <div class="sec-label">カテゴリ・案件 <button id="add-cat" title="カテゴリを追加">＋</button></div>
     <div class="cats" id="cats"></div>
     <div class="me-box">
-      <div class="lbl">追記者（あなた）</div>
+      <div class="lbl">担当メンバー</div>
       <div class="who"><div class="av" id="me-av">?</div><span id="me-name">未設定</span><button id="set-me">変更</button></div>
       <button class="logout" id="logout">ログアウト</button>
     </div>
@@ -268,6 +309,7 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
   <main class="main">
     <div class="topbar">
       <div style="flex:1;min-width:0">
+        <div class="tt-eb" id="view-eb">DASHBOARD</div>
         <h2 id="view-title">ダッシュボード</h2>
         <div class="desc" id="view-desc"></div>
       </div>
@@ -278,10 +320,13 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
   </main>
 </div>
 
+<div class="formscreen" id="formscreen" hidden></div>
+
 <div class="login-screen" id="login" hidden>
   <form class="login-card" id="login-form">
-    <div class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6"/></svg></div>
-    <h1>資料・タスク管理台帳</h1>
+    <div class="logo">蕎</div>
+    <div class="eb">MIKASOL SOBAPROJECT</div>
+    <h1>事業管理ワークスペース</h1>
     <p>社内共有のパスワードを入力してください</p>
     <input type="password" id="login-pw" placeholder="パスワード" autocomplete="current-password" autofocus>
     <button type="submit" class="btn pri" id="login-btn">ログイン</button>
@@ -295,9 +340,10 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 <script>
 "use strict";
 const STATUS=["未着手","進行中","完了"];
-const PALETTE=["#107569","#1d6fb8","#b45309","#7c3aed","#c2410c","#0891b2","#be185d","#4d7c0f"];
+const PRIORITIES=["低","通常","高","最優先"];
+const PALETTE=["#bd8b40","#3a5f86","#3f7d54","#7c5cbf","#b2482f","#0e7c86","#b8407a","#5f7a2e"];
 const state={projects:[],materials:[],tasks:[],view:"dashboard",pf:null,q:"",me:localStorage.getItem("kanri_me")||"",
-  tSort:"due",tDir:"asc",tStatus:"all",openMat:null,loginMode:false};
+  tSort:"due",tDir:"asc",tStatus:"all",openMat:null,loginMode:false,formOpen:false};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nowISO=()=>new Date().toISOString();
@@ -309,7 +355,7 @@ function fmtWhen(iso){if(!iso)return "";const d=new Date(iso);const t=todayStr()
 function initials(n){n=(n||"").trim();if(!n)return "?";return n.slice(0,2);}
 function projOf(id){return state.projects.find(p=>p.id===id);}
 function projName(id){const p=projOf(id);return p?p.name:"未分類";}
-function projColor(id){const p=projOf(id);return p?p.color:"#8a938e";}
+function projColor(id){const p=projOf(id);return p?p.color:"#aca493";}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(t._t);t._t=setTimeout(()=>t.hidden=true,2400);}
 
 /* ---------- API ---------- */
@@ -332,7 +378,7 @@ async function reload(){
 let pollTimer=null;
 (async function boot(){
   bindStatic();renderMe();
-  try{ await api("GET","/me"); }catch(e){ return; }  // 401 → showLogin already called
+  try{ await api("GET","/me"); }catch(e){ return; }
   await afterAuth();
 })();
 async function afterAuth(){
@@ -343,7 +389,7 @@ async function afterAuth(){
 }
 function showLogin(){
   state.loginMode=true;if(pollTimer)clearInterval(pollTimer);
-  $("#app").hidden=true;$("#overlay").hidden=true;$("#login").hidden=false;
+  $("#app").hidden=true;$("#overlay").hidden=true;$("#formscreen").hidden=true;$("#login").hidden=false;
   const pw=$("#login-pw");if(pw){pw.value="";setTimeout(()=>pw.focus(),50);}
 }
 
@@ -356,7 +402,7 @@ function bindStatic(){
   $("#logout").addEventListener("click",async()=>{ try{await api("POST","/logout");}catch{} showLogin(); });
   $("#search").addEventListener("input",e=>{state.q=e.target.value.trim();render();});
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal();});
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!state.loginMode)closeModal();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(state.formOpen)closeForm();else if(!state.loginMode)closeModal();}});
   $("#login-form").addEventListener("submit",doLogin);
 }
 async function doLogin(e){
@@ -378,11 +424,12 @@ function render(){
   $("#ct-mat").textContent=state.materials.length||"";
   $("#ct-task").textContent=state.tasks.filter(t=>t.status!=="完了").length||"";
   renderCats();
-  const titles={dashboard:["ダッシュボード","全体の状況と、対応が必要なタスクをひと目で確認"],
-    materials:["資料","写真・PDF・動画・Excel・リンクを案件ごとに整理。閲覧・追記できます"],
-    tasks:["タスク","誰が・いつまでに・何を。担当と期限、進捗を一元管理"]};
-  $("#view-title").textContent=titles[state.view][0];
-  $("#view-desc").textContent=titles[state.view][1];
+  const meta={dashboard:["DASHBOARD","ダッシュボード","全体の状況と、対応が必要なタスクをひと目で確認"],
+    materials:["DOCUMENT LIBRARY","資料","写真・PDF・動画・Excel・リンクを案件ごとに整理。閲覧・追記できます"],
+    tasks:["TASK MANAGEMENT","タスク","誰が・いつまでに・何を。担当と期限、進捗を一元管理"]};
+  $("#view-eb").textContent=meta[state.view][0];
+  $("#view-title").textContent=meta[state.view][1];
+  $("#view-desc").textContent=meta[state.view][2];
   $("#primary-add").textContent = state.view==="materials"?"＋ 資料を追加":"＋ タスクを追加";
   const c=$("#content");
   if(state.view==="dashboard") c.innerHTML=viewDashboard();
@@ -393,7 +440,7 @@ function render(){
 function renderMe(){$("#me-name").textContent=state.me||"未設定";$("#me-av").textContent=initials(state.me);}
 function renderCats(){
   const box=$("#cats");const counts={};state.materials.forEach(m=>{counts[m.projectId]=(counts[m.projectId]||0)+1;});
-  let h=`<button class="cat ${state.pf===null?"on":""}" data-pf="__all"><span class="dot" style="background:var(--faint)"></span>すべて<span class="ct">${state.materials.length}</span></button>`;
+  let h=`<button class="cat ${state.pf===null?"on":""}" data-pf="__all"><span class="dot" style="background:#7f889a"></span>すべて<span class="ct">${state.materials.length}</span></button>`;
   state.projects.forEach(p=>{h+=`<button class="cat ${state.pf===p.id?"on":""}" data-pf="${p.id}"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}<span class="ct">${counts[p.id]||0}</span><button class="del" data-delcat="${p.id}" title="削除">×</button></button>`;});
   box.innerHTML=h;
   box.querySelectorAll("[data-pf]").forEach(b=>b.addEventListener("click",e=>{
@@ -420,10 +467,10 @@ function viewDashboard(){
   <div class="dash-grid">
     <div class="panel">
       <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>対応が必要なタスク<span class="ct">${attn.length}件</span></h3>
-      <div class="body">${attn.length?attn.map(taskRow).join(""):`<div class="empty">期限の近い・超過したタスクはありません 🎉</div>`}</div>
+      <div class="body">${attn.length?attn.map(taskRow).join(""):`<div class="empty">期限の近い・超過したタスクはありません</div>`}</div>
     </div>
     <div class="panel">
-      <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M3 7l2-2h5l2 2h7v11H3z"/></svg>最近更新された資料<span class="ct">${state.materials.length}件</span></h3>
+      <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold-ink)" stroke-width="2" stroke-linecap="round"><path d="M3 7l2-2h5l2 2h7v11H3z"/></svg>最近更新された資料<span class="ct">${state.materials.length}件</span></h3>
       <div class="body">${recent.length?recent.map(m=>`
         <div class="trow" data-open-mat="${m.id}">
           <div class="grow"><div class="tt">${esc(m.title)}</div>
@@ -436,6 +483,7 @@ function viewDashboard(){
 function taskRow(t){
   const ds=dueState(t.due,t.status);const m=t.materialId?state.materials.find(x=>x.id===t.materialId):null;
   return `<div class="trow" data-open-task="${t.id}">
+    <span class="pri-dot pri-${t.priority||"通常"}" title="優先度: ${t.priority||"通常"}"></span>
     <div class="grow"><div class="tt">${esc(t.title)}</div>
     <div class="meta"><span class="av-mini">${esc(initials(t.assignee)||"—")}</span>${t.assignee?esc(t.assignee):"担当未定"}
     <span class="chip"><span class="dot" style="background:${projColor(t.projectId)}"></span>${esc(projName(t.projectId))}</span>
@@ -466,7 +514,7 @@ function matCard(m){
   const files=m.files||[];const imgs=files.filter(f=>f.kind==="file"&&(f.contentType||"").startsWith("image")).slice(0,4);
   const tasks=state.tasks.filter(t=>t.materialId===m.id&&t.status!=="完了").length;
   return `<div class="mcard" data-open-mat="${m.id}">
-    <div class="top"><h3>${esc(m.title)}</h3></div>
+    <h3>${esc(m.title)}</h3>
     <span class="chip" style="align-self:flex-start"><span class="dot" style="background:${projColor(m.projectId)}"></span>${esc(projName(m.projectId))}</span>
     ${m.desc?`<div class="mdesc">${esc(m.desc)}</div>`:""}
     ${imgs.length?`<div class="thumbs">${imgs.map(f=>`<img class="thumb" src="${attUrl(f)}" alt="" loading="lazy">`).join("")}${files.length>imgs.length?`<div class="thumb ic">+${files.length-imgs.length}</div>`:""}</div>`:""}
@@ -485,9 +533,11 @@ function viewTasks(){
   let list=state.tasks.filter(t=>state.pf===null||t.projectId===state.pf).filter(matchTask)
     .filter(t=>state.tStatus==="all"||t.status===state.tStatus);
   const dir=state.tDir==="asc"?1:-1;
+  const priRank={"最優先":0,"高":1,"通常":2,"低":3};
   list.sort((a,b)=>{let x,y;
     if(state.tSort==="due"){x=a.due||"9999";y=b.due||"9999";}
     else if(state.tSort==="status"){x=STATUS.indexOf(a.status);y=STATUS.indexOf(b.status);}
+    else if(state.tSort==="priority"){x=priRank[a.priority||"通常"];y=priRank[b.priority||"通常"];}
     else if(state.tSort==="assignee"){x=a.assignee||"んんん";y=b.assignee||"んんん";}
     else {x=a.title||"";y=b.title||"";}
     return x<y?-dir:x>y?dir:0;});
@@ -502,6 +552,7 @@ function viewTasks(){
   const arrow=k=>state.tSort===k?(state.tDir==="asc"?" ▲":" ▼"):"";
   return seg+`<div class="tbl-wrap"><table class="tasks">
     <thead><tr>
+      <th class="sortable" data-sort="priority">優先${arrow("priority")}</th>
       <th class="sortable" data-sort="title">件名${arrow("title")}</th>
       <th class="sortable" data-sort="assignee">担当者${arrow("assignee")}</th>
       <th class="sortable" data-sort="due">期限${arrow("due")}</th>
@@ -514,6 +565,7 @@ function viewTasks(){
 function taskTr(t){
   const ds=dueState(t.due,t.status);const m=t.materialId?state.materials.find(x=>x.id===t.materialId):null;
   return `<tr data-open-task="${t.id}">
+    <td><span class="pri-dot pri-${t.priority||"通常"}" title="${t.priority||"通常"}"></span></td>
     <td><div class="t-title">${esc(t.title)}</div>${m?`<div class="t-link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>${esc(m.title)}</div>`:""}</td>
     <td>${t.assignee?`<span style="display:inline-flex;align-items:center;gap:7px"><span class="av-mini">${esc(initials(t.assignee))}</span>${esc(t.assignee)}</span>`:`<span style="color:var(--faint)">未定</span>`}</td>
     <td><span class="due ${ds}"><span class="flag"></span>${fmtDue(t.due)}</span></td>
@@ -538,10 +590,24 @@ function optProjects(sel){return `<option value="">未分類</option>`+state.pro
 function optMaterials(sel){return `<option value="">（なし）</option>`+state.materials.map(m=>`<option value="${m.id}" ${sel===m.id?"selected":""}>${esc(m.title)}</option>`).join("");}
 async function ensureMe(){ if(state.me) return true; await promptName(); return !!state.me; }
 
+/* ---------- full-screen form core ---------- */
+function openForm(html){ $("#formscreen").innerHTML=html; $("#formscreen").hidden=false; state.formOpen=true; window.scrollTo(0,0); }
+function closeForm(){ $("#formscreen").hidden=true; $("#formscreen").innerHTML=""; state.formOpen=false; }
+function fsHeader(crumbCur){
+  return `<div class="fs-header">
+    <div class="logo">蕎</div>
+    <div><div class="eb">MIKASOL SOBAPROJECT</div><h1>事業管理ワークスペース</h1></div>
+    <div class="sp"></div>
+    <button class="cancel" id="fs-cancel">キャンセル</button>
+    <div class="av">${esc(initials(state.me)||"?")}</div>
+  </div>
+  <div class="fs-crumb"><span>プロジェクト</span><span class="sep">/</span><span>蕎麦事業</span><span class="sep">/</span><span class="cur">${esc(crumbCur)}</span></div>`;
+}
+
 /* ---------- name ---------- */
 function promptName(){
-  openModal(`<div class="modal" style="max-width:420px"><div class="modal-head"><h2>お名前を入力</h2><button class="x">×</button></div>
-    <div class="modal-body"><div class="field"><label>追記者名（社内で表示されます）</label><input id="f-me" value="${esc(state.me)}" placeholder="例）山崎"></div>
+  openModal(`<div class="modal" style="max-width:430px"><div class="modal-head"><h2>お名前を入力</h2><button class="x">×</button></div>
+    <div class="modal-body"><div class="field"><label>担当メンバー名（社内で表示されます）</label><input id="f-me" value="${esc(state.me)}" placeholder="例）山田 花子"></div>
     <div class="hint">タスク作成や資料への追記の際、記録者として表示されます。</div></div>
     <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">保存</button></div></div>`);
   const inp=$("#f-me");inp.focus();
@@ -552,9 +618,9 @@ function promptName(){
 
 /* ---------- category ---------- */
 function openCatForm(){
-  openModal(`<div class="modal" style="max-width:440px"><div class="modal-head"><h2>カテゴリ・案件を追加</h2><button class="x">×</button></div>
-  <div class="modal-body"><div class="field"><label>名称</label><input id="c-name" placeholder="例）2026春 新商品プロジェクト"></div>
-  <div class="field"><label>色</label><div id="c-colors" style="display:flex;gap:8px;flex-wrap:wrap">${PALETTE.map((c,i)=>`<button data-c="${c}" class="cdot" style="width:30px;height:30px;border-radius:8px;background:${c};border:3px solid ${i===0?"var(--ink)":"transparent"}"></button>`).join("")}</div></div></div>
+  openModal(`<div class="modal" style="max-width:450px"><div class="modal-head"><h2>カテゴリ・案件を追加</h2><button class="x">×</button></div>
+  <div class="modal-body"><div class="field"><label>名称</label><input id="c-name" placeholder="例）2026春 新メニュー開発"></div>
+  <div class="field"><label>色</label><div id="c-colors" style="display:flex;gap:8px;flex-wrap:wrap">${PALETTE.map((c,i)=>`<button data-c="${c}" class="cdot" style="width:30px;height:30px;border-radius:9px;background:${c};border:3px solid ${i===0?"var(--ink)":"transparent"}"></button>`).join("")}</div></div></div>
   <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">追加</button></div></div>`);
   let color=PALETTE[0];const inp=$("#c-name");inp.focus();
   $("#c-colors").querySelectorAll(".cdot").forEach(b=>b.onclick=()=>{color=b.dataset.c;$("#c-colors").querySelectorAll(".cdot").forEach(x=>x.style.borderColor="transparent");b.style.borderColor="var(--ink)";});
@@ -564,69 +630,113 @@ function openCatForm(){
 }
 function confirmDelCat(id){
   const p=projOf(id);if(!p)return;const n=state.materials.filter(m=>m.projectId===id).length+state.tasks.filter(t=>t.projectId===id).length;
-  openModal(`<div class="modal" style="max-width:420px"><div class="modal-head"><h2>カテゴリを削除</h2><button class="x">×</button></div>
+  openModal(`<div class="modal" style="max-width:430px"><div class="modal-head"><h2>カテゴリを削除</h2><button class="x">×</button></div>
   <div class="modal-body"><p>「${esc(p.name)}」を削除します。${n?`このカテゴリの ${n} 件の資料・タスクは「未分類」になります（データは残ります）。`:""}</p></div>
   <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn danger" id="s">削除する</button></div></div>`);
   $("#c").onclick=closeModal;
   $("#s").onclick=async()=>{ try{ await api("DELETE","/projects/"+id); if(state.pf===id)state.pf=null; await reload(); closeModal(); render(); toast("削除しました"); }catch(e){toast("エラー: "+e.message);} };
 }
 
-/* ---------- task form ---------- */
+/* ---------- task form (full screen) ---------- */
 function openTaskForm(id,presetMat){
   const t=id?state.tasks.find(x=>x.id===id):null;
-  openModal(`<div class="modal"><div class="modal-head"><h2>${t?"タスクを編集":"タスクを追加"}</h2><button class="x">×</button></div>
-  <div class="modal-body">
-    <div class="field"><label>件名 *</label><input id="t-title" value="${t?esc(t.title):""}" placeholder="例）商品パンフレットの初稿を作成"></div>
-    <div class="field"><div class="row">
-      <div><label>担当者</label><input id="t-assignee" value="${t?esc(t.assignee||""):esc(state.me)}" placeholder="担当者名"></div>
-      <div><label>期限</label><input id="t-due" type="date" value="${t?t.due||"":""}"></div>
-    </div></div>
-    <div class="field"><div class="row">
-      <div><label>状況</label><select id="t-status">${STATUS.map(s=>`<option ${((t&&t.status)||"未着手")===s?"selected":""}>${s}</option>`).join("")}</select></div>
-      <div><label>カテゴリ・案件</label><select id="t-proj">${optProjects(t?t.projectId:state.pf)}</select></div>
-    </div></div>
-    <div class="field"><label>紐付ける資料</label><select id="t-mat">${optMaterials(t?t.materialId:presetMat)}</select></div>
-    <div class="field"><label>メモ</label><textarea id="t-note" placeholder="補足があれば">${t?esc(t.note||""):""}</textarea></div>
-  </div>
-  <div class="modal-foot">${t?`<button class="btn danger" id="del" style="margin-right:auto">削除</button>`:""}<button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">保存</button></div></div>`);
-  $("#t-title").focus();$("#c").onclick=closeModal;
-  if(t)$("#del").onclick=async()=>{if(confirm("このタスクを削除しますか？")){try{await api("DELETE","/tasks/"+t.id);await reload();closeModal();render();refreshMat();toast("削除しました");}catch(e){toast("エラー: "+e.message);}}};
-  $("#s").onclick=async()=>{
-    const title=$("#t-title").value.trim();if(!title){$("#t-title").focus();return;}
-    const v={assignee:$("#t-assignee").value.trim(),due:$("#t-due").value||"",status:$("#t-status").value,
+  const assignees=[...new Set(state.tasks.map(x=>x.assignee).filter(Boolean))];
+  openForm(`${fsHeader(t?"タスクを編集":"新規タスク")}
+  <div class="fs-wrap"><div class="fs-card">
+    <div class="fs-left">
+      <div class="tag"><span class="d"></span>TASK MANAGEMENT</div>
+      <h2>次の一手を、<br>ここから始める。</h2>
+      <p>蕎麦事業に関するタスクを、チームで迷わず管理できます。担当と期限をひとつの場所に集約しましょう。</p>
+      <div class="foot">MIKASOL SOBAPROJECT ・ 事業管理ワークスペース</div>
+    </div>
+    <div class="fs-right">
+      <div class="plus">+</div>
+      <div class="eb">${t?"EDIT ITEM":"CREATE NEW ITEM"}</div>
+      <h2>${t?"タスクを編集":"新しいタスクを登録"}</h2>
+      <div class="sub">事業の進行に必要な情報を入力してください。</div>
+      <div class="fs-field"><div class="flabel">タスク名<span class="req">*</span></div>
+        <input id="t-title" value="${t?esc(t.title):""}" placeholder="例：秋季メニューの原価計算を確認"></div>
+      <div class="fs-row">
+        <div class="fs-field"><div class="flabel">カテゴリ</div><select id="t-proj">${optProjects(t?t.projectId:state.pf)}</select></div>
+        <div class="fs-field"><div class="flabel">優先度</div><select id="t-pri">${PRIORITIES.map(pp=>`<option ${((t&&t.priority)||"通常")===pp?"selected":""}>${pp}</option>`).join("")}</select></div>
+      </div>
+      <div class="fs-field"><div class="flabel">詳細・メモ<span class="opt">任意</span></div>
+        <textarea id="t-note" placeholder="背景、確認事項、完了条件などを入力…">${t?esc(t.note||""):""}</textarea></div>
+      <div class="fs-row">
+        <div class="fs-field"><div class="flabel">担当者</div>
+          <input id="t-assignee" list="assignee-list" value="${t?esc(t.assignee||""):esc(state.me)}" placeholder="担当者名">
+          <datalist id="assignee-list">${assignees.map(a=>`<option value="${esc(a)}">`).join("")}</datalist></div>
+        <div class="fs-field"><div class="flabel">期限<span class="opt">任意</span></div><input id="t-due" type="date" value="${t?t.due||"":""}"></div>
+      </div>
+      <div class="fs-row">
+        <div class="fs-field"><div class="flabel">状況</div><select id="t-status">${STATUS.map(s=>`<option ${((t&&t.status)||"未着手")===s?"selected":""}>${s}</option>`).join("")}</select></div>
+        <div class="fs-field"><div class="flabel">関連資料<span class="opt">任意</span></div><select id="t-mat">${optMaterials(t?t.materialId:presetMat)}</select></div>
+      </div>
+      <div class="fs-foot">
+        ${t?`<button class="btn danger" id="del">削除</button>`:""}
+        <div class="spacer"></div>
+        <button class="btn" id="cancel2">キャンセル</button>
+        <button class="btn pri" id="save">${t?"更新する":"登録する"}</button>
+      </div>
+    </div>
+  </div></div>`);
+  $("#fs-cancel").onclick=closeForm;$("#cancel2").onclick=closeForm;
+  $("#t-title").focus();
+  if(t)$("#del").onclick=async()=>{if(confirm("このタスクを削除しますか？")){try{await api("DELETE","/tasks/"+t.id);await reload();closeForm();render();refreshMat();toast("削除しました");}catch(e){toast("エラー: "+e.message);}}};
+  $("#save").onclick=async()=>{
+    const title=$("#t-title").value.trim();if(!title){$("#t-title").focus();toast("タスク名を入力してください");return;}
+    const v={assignee:$("#t-assignee").value.trim(),due:$("#t-due").value||"",status:$("#t-status").value,priority:$("#t-pri").value,
       projectId:$("#t-proj").value||"",materialId:$("#t-mat").value||"",note:$("#t-note").value.trim()};
     if(!await ensureMe())return;
-    try{ await api("POST","/tasks",{id:t?t.id:undefined,title,...v,by:state.me}); await reload(); closeModal(); render(); refreshMat(); toast(t?"更新しました":"タスクを追加しました"); }
+    try{ await api("POST","/tasks",{id:t?t.id:undefined,title,...v,by:state.me}); await reload(); closeForm(); render(); refreshMat(); toast(t?"更新しました":"タスクを登録しました"); }
     catch(e){toast("エラー: "+e.message);}
   };
 }
 
-/* ---------- material form ---------- */
+/* ---------- material form (full screen) ---------- */
 function openMaterialForm(id){
   const m=id?state.materials.find(x=>x.id===id):null;
-  openModal(`<div class="modal"><div class="modal-head"><h2>${m?"資料の情報を編集":"資料を追加"}</h2><button class="x">×</button></div>
-  <div class="modal-body">
-    <div class="field"><label>タイトル *</label><input id="m-title" value="${m?esc(m.title):""}" placeholder="例）新商品カタログ 素材一式"></div>
-    <div class="field"><label>カテゴリ・案件</label><select id="m-proj">${optProjects(m?m.projectId:state.pf)}</select></div>
-    <div class="field"><label>説明</label><textarea id="m-desc" placeholder="内容の概要・メモ">${m?esc(m.desc||""):""}</textarea></div>
-    ${!m?`<div class="hint">作成後、詳細画面で写真・PDF・動画・Excel・リンクの添付や、追記ができます。</div>`:""}
-  </div>
-  <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">保存</button></div></div>`);
-  $("#m-title").focus();$("#c").onclick=closeModal;
-  $("#s").onclick=async()=>{
-    const title=$("#m-title").value.trim();if(!title){$("#m-title").focus();return;}
+  openForm(`${fsHeader(m?"資料を編集":"新規資料")}
+  <div class="fs-wrap"><div class="fs-card">
+    <div class="fs-left">
+      <div class="tag"><span class="d"></span>DOCUMENT LIBRARY</div>
+      <h2>情報を、<br>一か所に集める。</h2>
+      <p>写真・PDF・動画・Excelなどの資料を案件ごとに整理。作成後に添付や追記ができます。</p>
+      <div class="foot">MIKASOL SOBAPROJECT ・ 事業管理ワークスペース</div>
+    </div>
+    <div class="fs-right">
+      <div class="plus">+</div>
+      <div class="eb">${m?"EDIT ITEM":"CREATE NEW ITEM"}</div>
+      <h2>${m?"資料の情報を編集":"新しい資料を登録"}</h2>
+      <div class="sub">資料のタイトルと分類を入力してください。</div>
+      <div class="fs-field"><div class="flabel">タイトル<span class="req">*</span></div>
+        <input id="m-title" value="${m?esc(m.title):""}" placeholder="例：新商品カタログ 素材一式"></div>
+      <div class="fs-field"><div class="flabel">カテゴリ・案件</div><select id="m-proj">${optProjects(m?m.projectId:state.pf)}</select></div>
+      <div class="fs-field"><div class="flabel">説明<span class="opt">任意</span></div>
+        <textarea id="m-desc" placeholder="内容の概要・メモ">${m?esc(m.desc||""):""}</textarea></div>
+      ${!m?`<div class="hint">登録後の詳細画面で、写真・PDF・動画・Excel・リンクの添付や追記ができます。</div>`:""}
+      <div class="fs-foot"><div class="spacer"></div>
+        <button class="btn" id="cancel2">キャンセル</button>
+        <button class="btn pri" id="save">${m?"更新する":"登録する"}</button>
+      </div>
+    </div>
+  </div></div>`);
+  $("#fs-cancel").onclick=closeForm;$("#cancel2").onclick=closeForm;
+  $("#m-title").focus();
+  $("#save").onclick=async()=>{
+    const title=$("#m-title").value.trim();if(!title){$("#m-title").focus();toast("タイトルを入力してください");return;}
     const pid=$("#m-proj").value||"",desc=$("#m-desc").value.trim();
     if(!await ensureMe())return;
     try{
       const res=await api("POST","/materials",{id:m?m.id:undefined,title,projectId:pid,desc,by:state.me});
-      await reload();
-      if(m){closeModal();render();toast("更新しました");}
-      else{closeModal();setView("materials");toast("資料を追加しました");openMaterial(res.id);}
+      await reload();closeForm();
+      if(m){render();toast("更新しました");}
+      else{setView("materials");toast("資料を登録しました");openMaterial(res.id);}
     }catch(e){toast("エラー: "+e.message);}
   };
 }
 
-/* ---------- material detail ---------- */
+/* ---------- material detail (modal) ---------- */
 function openMaterial(id){state.openMat=id;renderMatModal();}
 function refreshMat(){if(state.openMat&&!$("#overlay").hidden)renderMatModal(true);}
 function curMat(){return state.materials.find(m=>m.id===state.openMat);}
@@ -641,7 +751,7 @@ function renderMatModal(keepDraft){
     <button class="btn ghost sm" id="m-edit" title="情報を編集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
     <button class="x">×</button></div>
   <div class="modal-body">
-    ${m.desc?`<p style="color:var(--muted);margin:0 0 6px;white-space:pre-wrap">${esc(m.desc)}</p>`:""}
+    ${m.desc?`<p style="color:var(--body);margin:0 0 6px;white-space:pre-wrap">${esc(m.desc)}</p>`:""}
     <div class="md-meta"><span style="font-size:11.5px;color:var(--faint)">作成: ${esc(m.createdBy||"—")} ・ ${fmtWhen(m.createdAt)}${m.updatedAt&&m.updatedAt!==m.createdAt?" ／ 更新 "+fmtWhen(m.updatedAt):""}</span>
     <button class="btn danger sm" id="m-del" style="margin-left:auto">資料を削除</button></div>
 
@@ -657,7 +767,7 @@ function renderMatModal(keepDraft){
 
     <div class="md-sec"><h4>関連タスク <span class="ct">${linked.length}</span><button class="btn ghost sm" id="add-task" style="margin-left:auto">＋ タスク</button></h4>
       <div style="display:flex;flex-direction:column;gap:8px">${linked.length?linked.map(t=>{const ds=dueState(t.due,t.status);return `<div class="mini-task" data-task="${t.id}">
-        <span class="pill st-${t.status}">${t.status}</span>
+        <span class="pri-dot pri-${t.priority||"通常"}"></span><span class="pill st-${t.status}">${t.status}</span>
         <div class="grow"><div class="tt">${esc(t.title)}</div><div class="meta" style="font-size:11.5px;color:var(--muted)">${t.assignee?esc(t.assignee):"担当未定"} ・ <span class="due ${ds}" style="font-size:11.5px">${fmtDue(t.due)}</span></div></div>
       </div>`;}).join(""):`<div style="font-size:12.5px;color:var(--faint)">この資料に紐づくタスクはありません。</div>`}</div>
     </div>
@@ -667,10 +777,10 @@ function renderMatModal(keepDraft){
       <div class="note-add"><textarea id="note-input" placeholder="追記を入力…（社内に共有されます）">${esc(draft)}</textarea><button class="btn pri" id="note-send" style="align-self:stretch">追記</button></div>
     </div>
   </div></div>`);
-  $("#m-edit").onclick=()=>openMaterialForm(m.id);
+  $("#m-edit").onclick=()=>{closeModal();openMaterialForm(m.id);};
   $("#m-del").onclick=async()=>{if(confirm("この資料と、添付・追記をすべて削除しますか？")){try{await api("DELETE","/materials/"+m.id);await reload();closeModal();render();toast("削除しました");}catch(e){toast("エラー: "+e.message);}}};
-  $("#add-task").onclick=()=>openTaskForm(null,m.id);
-  $("#modal-root").querySelectorAll("[data-task]").forEach(el=>el.onclick=()=>openTaskForm(el.dataset.task));
+  $("#add-task").onclick=()=>{const mid=m.id;closeModal();openTaskForm(null,mid);};
+  $("#modal-root").querySelectorAll("[data-task]").forEach(el=>el.onclick=()=>{const tid=el.dataset.task;closeModal();openTaskForm(tid);});
   $("#modal-root").querySelectorAll("[data-rm]").forEach(el=>el.onclick=e=>{e.stopPropagation();removeAtt(m.id,el.dataset.rm);});
   $("#add-link").onclick=()=>openLinkForm(m.id);
   $("#note-send").onclick=()=>sendNote(m.id);
@@ -705,9 +815,9 @@ async function uploadFiles(matId,fileList){
   await reload();render();refreshMat();
 }
 function openLinkForm(matId){
-  openModal(`<div class="modal" style="max-width:460px"><div class="modal-head"><h2>リンクを添付</h2><button class="x">×</button></div>
+  openModal(`<div class="modal" style="max-width:470px"><div class="modal-head"><h2>リンクを添付</h2><button class="x">×</button></div>
   <div class="modal-body">
-    <div class="field"><label>URL *</label><input id="l-url" placeholder="https://… （Google Drive / SharePoint 等）"></div>
+    <div class="field"><label>URL<span style="color:var(--gold-ink)"> *</span></label><input id="l-url" placeholder="https://… （Google Drive / SharePoint 等）"></div>
     <div class="field"><label>表示名</label><input id="l-name" placeholder="例）売上集計.xlsx"></div>
     <div class="hint">大容量動画や外部資料は、共有ドライブにアップした上でリンクを貼ると便利です。</div>
   </div>
