@@ -177,11 +177,69 @@ async function route(req, env, url) {
     return json({ ok: true });
   }
 
+  // ---- 研究・開発 ----
+  if (p === "/api/rnd/themes" && m === "POST") {
+    const b = await req.json();
+    const now = nowISO();
+    if (b.id) {
+      await DB.prepare("UPDATE rnd_themes SET name=?, descr=?, updated_at=? WHERE id=?")
+        .bind(b.name || "無題", b.desc || "", now, b.id).run();
+      return json({ id: b.id });
+    }
+    const id = uid();
+    await DB.prepare("INSERT INTO rnd_themes (id,name,descr,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?)")
+      .bind(id, b.name || "無題", b.desc || "", b.by || "", now, now).run();
+    return json({ id });
+  }
+  let rtm = p.match(/^\/api\/rnd\/themes\/([^/]+)$/);
+  if (rtm && m === "DELETE") {
+    const tid = rtm[1];
+    const trials = (await DB.prepare("SELECT id FROM rnd_trials WHERE theme_id=?").bind(tid).all()).results;
+    for (const tr of trials) await deleteTrialFiles(env, tr.id);
+    await DB.prepare("DELETE FROM rnd_trials WHERE theme_id=?").bind(tid).run();
+    await DB.prepare("DELETE FROM rnd_themes WHERE id=?").bind(tid).run();
+    return json({ ok: true });
+  }
+  let rtr = p.match(/^\/api\/rnd\/themes\/([^/]+)\/trials$/);
+  if (rtr && m === "POST") {
+    const b = await req.json();
+    const themeId = rtr[1];
+    const mx = await DB.prepare("SELECT MAX(seq) AS mx FROM rnd_trials WHERE theme_id=?").bind(themeId).first();
+    const seq = (mx && mx.mx ? mx.mx : 0) + 1;
+    const id = uid();
+    await DB.prepare("INSERT INTO rnd_trials (id,theme_id,seq,ingredients,method,result,rating,created_by,created_at) VALUES (?,?,?,?,?,?,?,?,?)")
+      .bind(id, themeId, seq, JSON.stringify(b.ingredients || []), b.method || "", b.result || "", b.rating || 0, b.by || "", nowISO()).run();
+    await DB.prepare("UPDATE rnd_themes SET updated_at=? WHERE id=?").bind(nowISO(), themeId).run();
+    return json({ id, seq });
+  }
+  let rtu = p.match(/^\/api\/rnd\/trials\/([^/]+)$/);
+  if (rtu && m === "POST") {
+    const b = await req.json();
+    await DB.prepare("UPDATE rnd_trials SET ingredients=?, method=?, result=?, rating=? WHERE id=?")
+      .bind(JSON.stringify(b.ingredients || []), b.method || "", b.result || "", b.rating || 0, rtu[1]).run();
+    const row = await DB.prepare("SELECT theme_id FROM rnd_trials WHERE id=?").bind(rtu[1]).first();
+    if (row) await DB.prepare("UPDATE rnd_themes SET updated_at=? WHERE id=?").bind(nowISO(), row.theme_id).run();
+    return json({ ok: true });
+  }
+  if (rtu && m === "DELETE") {
+    await deleteTrialFiles(env, rtu[1]);
+    await DB.prepare("DELETE FROM rnd_trials WHERE id=?").bind(rtu[1]).run();
+    return json({ ok: true });
+  }
+  let rtf = p.match(/^\/api\/rnd\/trials\/([^/]+)\/files$/);
+  if (rtf && m === "POST") return uploadFile(req, env, rtf[1]);
+
   return json({ error: "not_found" }, 404);
 }
 
 async function touch(DB, materialId) {
   await DB.prepare("UPDATE materials SET updated_at=? WHERE id=?").bind(nowISO(), materialId).run();
+}
+
+async function deleteTrialFiles(env, ownerId) {
+  const fs = (await env.DB.prepare("SELECT kv_key FROM files WHERE material_id=? AND kind='file'").bind(ownerId).all()).results;
+  for (const f of fs) if (f.kv_key) await env.FILES.delete(f.kv_key);
+  await env.DB.prepare("DELETE FROM files WHERE material_id=?").bind(ownerId).run();
 }
 
 async function uploadFile(req, env, materialId) {
@@ -217,12 +275,14 @@ async function serveFile(env, fileId) {
 }
 
 async function getState(DB) {
-  const [projects, materials, files, notes, tasks] = await Promise.all([
+  const [projects, materials, files, notes, tasks, rndThemes, rndTrials] = await Promise.all([
     DB.prepare("SELECT * FROM projects ORDER BY ord, created_at").all(),
     DB.prepare("SELECT * FROM materials").all(),
     DB.prepare("SELECT * FROM files").all(),
     DB.prepare("SELECT * FROM notes ORDER BY at").all(),
     DB.prepare("SELECT * FROM tasks").all(),
+    DB.prepare("SELECT * FROM rnd_themes").all(),
+    DB.prepare("SELECT * FROM rnd_trials ORDER BY seq").all(),
   ]);
   const filesByMat = {}, notesByMat = {};
   for (const f of files.results) {
@@ -246,5 +306,14 @@ async function getState(DB) {
       priority: t.priority || "通常", projectId: t.project_id, materialId: t.material_id, note: t.note,
       createdBy: t.created_by, createdAt: t.created_at, updatedAt: t.updated_at,
     })),
+    rnd: rndThemes.results.map((th) => ({
+      id: th.id, name: th.name, desc: th.descr, createdBy: th.created_by, createdAt: th.created_at, updatedAt: th.updated_at,
+      trials: rndTrials.results.filter((tr) => tr.theme_id === th.id).map((tr) => ({
+        id: tr.id, seq: tr.seq, ingredients: safeJson(tr.ingredients, []), method: tr.method,
+        result: tr.result, rating: tr.rating || 0, createdBy: tr.created_by, createdAt: tr.created_at,
+        photos: filesByMat[tr.id] || [],
+      })),
+    })),
   });
 }
+function safeJson(s, fb) { try { return JSON.parse(s); } catch { return fb; } }

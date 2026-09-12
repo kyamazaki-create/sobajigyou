@@ -254,6 +254,36 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 .spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* R&D */
+.rnd-badge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 9px;border-radius:9px;background:var(--navy);color:var(--cream,#f4efe6);font-family:var(--disp);font-weight:700;font-size:13px;flex:none}
+.stars{display:inline-flex;gap:1px;color:var(--gold);font-size:14px;letter-spacing:1px}
+.stars .off{color:var(--line-strong)}
+.ing-line{font-size:12.5px;color:var(--body);line-height:1.7}
+.ing-tag{display:inline-block;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 8px;margin:0 4px 4px 0;font-size:12px}
+.ing-tag b{font-variant-numeric:tabular-nums}
+.hyd{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border:1px solid #e6d3a8;padding:2px 9px;border-radius:999px}
+.trial{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.trial+.trial{margin-top:12px}
+.trial-h{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.trial-h .meta{font-size:11.5px;color:var(--muted);margin-left:auto;text-align:right}
+.trial-b{padding:13px 15px;display:flex;flex-direction:column;gap:11px}
+.trial-b .lab{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:.04em;margin-bottom:3px}
+.trial-b .val{font-size:13px;white-space:pre-wrap;word-break:break-word;color:var(--body)}
+.trial-photos{display:flex;gap:7px;flex-wrap:wrap}
+.trial-photos .tp{position:relative}
+.trial-photos img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.trial-photos .tp .rm{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--danger);color:#fff;border:2px solid var(--surface);font-size:12px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.trial-acts{display:flex;gap:6px;margin-left:auto}
+.ing-row{display:grid;grid-template-columns:1fr 88px 70px 32px;gap:8px;margin-bottom:8px;align-items:center}
+.ing-row input{padding:9px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--ink);width:100%}
+.ing-row .del{border:none;background:none;color:var(--faint);font-size:17px;cursor:pointer;border-radius:6px}
+.ing-row .del:hover{color:var(--danger)}
+.rate-pick{display:inline-flex;gap:4px;font-size:26px;color:var(--line-strong);cursor:pointer}
+.rate-pick .s{transition:transform .1s}
+.rate-pick .s.on{color:var(--gold)}
+.rate-pick .s:hover{transform:scale(1.15)}
+@media (max-width:760px){.ing-row{grid-template-columns:1fr 70px 56px 28px;gap:6px}}
+
 /* ---------- login ---------- */
 .login-screen{position:fixed;inset:0;display:grid;place-items:center;z-index:100;padding:20px;
   background:linear-gradient(140deg,#f5efe3,#ece0cb)}
@@ -335,6 +365,7 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
       <button data-view="dashboard" class="on"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>ダッシュボード</button>
       <button data-view="materials"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l2-2h5l2 2h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z"/></svg>資料<span class="ct" id="ct-mat"></span></button>
       <button data-view="tasks"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/></svg>タスク<span class="ct" id="ct-task"></span></button>
+      <button data-view="rnd"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3"/><path d="M7.5 14h9"/></svg>研究・開発<span class="ct" id="ct-rnd"></span></button>
     </nav>
     <div class="sec-label">カテゴリ・案件 <button id="add-cat" title="カテゴリを追加">＋</button></div>
     <div class="cats" id="cats"></div>
@@ -383,8 +414,8 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 const STATUS=["未着手","進行中","完了"];
 const PRIORITIES=["低","通常","高","最優先"];
 const PALETTE=["#bd8b40","#3a5f86","#3f7d54","#7c5cbf","#b2482f","#0e7c86","#b8407a","#5f7a2e"];
-const state={projects:[],materials:[],tasks:[],view:"dashboard",pf:null,q:"",me:localStorage.getItem("kanri_me")||"",
-  tSort:"due",tDir:"asc",tStatus:"all",openMat:null,loginMode:false,formOpen:false};
+const state={projects:[],materials:[],tasks:[],rnd:[],view:"dashboard",pf:null,q:"",me:localStorage.getItem("kanri_me")||"",
+  tSort:"due",tDir:"asc",tStatus:"all",openMat:null,openTheme:null,loginMode:false,formOpen:false};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nowISO=()=>new Date().toISOString();
@@ -413,6 +444,7 @@ async function reload(){
   state.projects=(s.projects||[]).sort((a,b)=>(a.order||0)-(b.order||0));
   state.materials=s.materials||[];
   state.tasks=s.tasks||[];
+  state.rnd=s.rnd||[];
 }
 
 /* ---------- boot ---------- */
@@ -426,7 +458,7 @@ async function afterAuth(){
   $("#login").hidden=true;$("#app").hidden=false;state.loginMode=false;
   try{ await reload(); render(); }catch(e){ if(String(e.message)!=="unauth") toast("読み込みエラー: "+e.message); }
   if(pollTimer)clearInterval(pollTimer);
-  pollTimer=setInterval(async()=>{ try{ await reload(); render(); refreshMat(); }catch(e){} },25000);
+  pollTimer=setInterval(async()=>{ try{ await reload(); render(); refreshMat(); refreshTheme(); }catch(e){} },25000);
 }
 function showLogin(){
   state.loginMode=true;if(pollTimer)clearInterval(pollTimer);
@@ -437,7 +469,7 @@ function showLogin(){
 /* ---------- static bindings ---------- */
 function bindStatic(){
   $("#nav").addEventListener("click",e=>{const b=e.target.closest("button[data-view]");if(!b)return;setView(b.dataset.view);});
-  $("#primary-add").addEventListener("click",()=>{ if(state.view==="materials") openMaterialForm(); else openTaskForm(); });
+  $("#primary-add").addEventListener("click",()=>{ if(state.view==="materials") openMaterialForm(); else if(state.view==="rnd") openThemeForm(); else openTaskForm(); });
   $("#add-cat").addEventListener("click",openCatForm);
   $("#set-me").addEventListener("click",promptName);
   $("#logout").addEventListener("click",async()=>{ try{await api("POST","/logout");}catch{} showLogin(); });
@@ -468,17 +500,20 @@ function render(){
   if(state.loginMode)return;
   $("#ct-mat").textContent=state.materials.length||"";
   $("#ct-task").textContent=state.tasks.filter(t=>t.status!=="完了").length||"";
+  $("#ct-rnd").textContent=state.rnd.length||"";
   renderCats();
   const meta={dashboard:["DASHBOARD","ダッシュボード","全体の状況と、対応が必要なタスクをひと目で確認"],
     materials:["DOCUMENT LIBRARY","資料","写真・PDF・動画・Excel・リンクを案件ごとに整理。閲覧・追記できます"],
-    tasks:["TASK MANAGEMENT","タスク","誰が・いつまでに・何を。担当と期限、進捗を一元管理"]};
+    tasks:["TASK MANAGEMENT","タスク","誰が・いつまでに・何を。担当と期限、進捗を一元管理"],
+    rnd:["RESEARCH & DEVELOPMENT","そば研究・開発","テーマごとに試作を記録。配合・工程・評価を回ごとに残して改良を積み重ねる"]};
   $("#view-eb").textContent=meta[state.view][0];
   $("#view-title").textContent=meta[state.view][1];
   $("#view-desc").textContent=meta[state.view][2];
-  $("#primary-add").textContent = state.view==="materials"?"＋ 資料を追加":"＋ タスクを追加";
+  $("#primary-add").textContent = state.view==="materials"?"＋ 資料を追加":state.view==="rnd"?"＋ 研究テーマを追加":"＋ タスクを追加";
   const c=$("#content");
   if(state.view==="dashboard") c.innerHTML=viewDashboard();
   else if(state.view==="materials") c.innerHTML=viewMaterials();
+  else if(state.view==="rnd") c.innerHTML=viewRnd();
   else c.innerHTML=viewTasks();
   wireContent();
 }
@@ -624,13 +659,14 @@ function wireContent(){
   const c=$("#content");
   c.querySelectorAll("[data-open-mat]").forEach(el=>el.addEventListener("click",()=>openMaterial(el.dataset.openMat)));
   c.querySelectorAll("[data-open-task]").forEach(el=>el.addEventListener("click",()=>openTaskForm(el.dataset.openTask)));
+  c.querySelectorAll("[data-open-theme]").forEach(el=>el.addEventListener("click",()=>openTheme(el.dataset.openTheme)));
   const seg=c.querySelector("#st-seg");if(seg)seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{state.tStatus=b.dataset.st;render();}));
   c.querySelectorAll("th.sortable").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.sort;if(state.tSort===k)state.tDir=state.tDir==="asc"?"desc":"asc";else{state.tSort=k;state.tDir="asc";}render();}));
 }
 
 /* ---------- modal core ---------- */
 function openModal(html){closeDrawer();$("#modal-root").innerHTML=html;$("#overlay").hidden=false;const x=$("#modal-root .x");if(x)x.onclick=closeModal;}
-function closeModal(){$("#overlay").hidden=true;$("#modal-root").innerHTML="";state.openMat=null;}
+function closeModal(){$("#overlay").hidden=true;$("#modal-root").innerHTML="";state.openMat=null;state.openTheme=null;}
 function optProjects(sel){return `<option value="">未分類</option>`+state.projects.map(p=>`<option value="${p.id}" ${sel===p.id?"selected":""}>${esc(p.name)}</option>`).join("");}
 function optMaterials(sel){return `<option value="">（なし）</option>`+state.materials.map(m=>`<option value="${m.id}" ${sel===m.id?"selected":""}>${esc(m.title)}</option>`).join("");}
 async function ensureMe(){ if(state.me) return true; await promptName(); return !!state.me; }
@@ -783,14 +819,14 @@ function openMaterialForm(id){
 
 /* ---------- material detail (modal) ---------- */
 function openMaterial(id){state.openMat=id;renderMatModal();}
-function refreshMat(){if(state.openMat&&!$("#overlay").hidden)renderMatModal(true);}
+function refreshMat(){if(state.openMat&&!$("#overlay").hidden&&$("#modal-root [data-kind='mat-detail']"))renderMatModal(true);}
 function curMat(){return state.materials.find(m=>m.id===state.openMat);}
 function renderMatModal(keepDraft){
   const m=curMat();if(!m){if(state.openMat)closeModal();return;}
   const draft=keepDraft&&$("#note-input")?$("#note-input").value:"";
   const files=m.files||[],notes=m.notes||[];
   const linked=state.tasks.filter(t=>t.materialId===m.id).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
-  openModal(`<div class="modal wide"><div class="modal-head">
+  openModal(`<div class="modal wide" data-kind="mat-detail"><div class="modal-head">
     <div style="flex:1"><span class="chip" style="margin-bottom:8px"><span class="dot" style="background:${projColor(m.projectId)}"></span>${esc(projName(m.projectId))}</span>
     <h2>${esc(m.title)}</h2></div>
     <button class="btn ghost sm" id="m-edit" title="情報を編集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
@@ -889,6 +925,176 @@ async function sendNote(matId){
   const inp=$("#note-input");const txt=inp.value.trim();if(!txt)return;
   if(!await ensureMe())return;
   try{ await api("POST","/materials/"+matId+"/notes",{by:state.me,text:txt}); await reload(); state.openMat=matId; renderMatModal(); render(); toast("追記しました"); }
+  catch(e){toast("エラー: "+e.message);}
+}
+
+/* ================= 研究・開発 ================= */
+function ingSummary(ings){ return (ings||[]).filter(i=>i.name).map(i=>`${i.name}${i.amount!==""&&i.amount!=null?" "+i.amount+(i.unit||""):""}`).join("・"); }
+function hydration(ings){
+  let flour=0, water=0;
+  (ings||[]).forEach(i=>{const a=parseFloat(i.amount);if(isNaN(a))return;
+    if((i.name||"").includes("粉"))flour+=a; if((i.name||"").includes("水"))water+=a;});
+  if(flour>0&&water>0)return Math.round(water/flour*100);
+  return null;
+}
+function stars(n){n=Math.max(0,Math.min(5,n||0));let h="";for(let i=1;i<=5;i++)h+=`<span class="${i<=n?"":"off"}">★</span>`;return `<span class="stars">${h}</span>`;}
+function matchTheme(th){if(!state.q)return true;const q=state.q.toLowerCase();return (th.name||"").toLowerCase().includes(q)||(th.desc||"").toLowerCase().includes(q)||(th.trials||[]).some(tr=>ingSummary(tr.ingredients).toLowerCase().includes(q)||(tr.result||"").toLowerCase().includes(q));}
+function viewRnd(){
+  let list=state.rnd.filter(matchTheme).sort((a,b)=>(b.updatedAt||b.createdAt||"").localeCompare(a.updatedAt||a.createdAt||""));
+  if(!list.length) return `<div class="panel"><div class="empty">${state.q?"該当する研究テーマがありません。":"研究テーマがまだありません。<br><br>右上の「＋ 研究テーマを追加」から、テーマを作成し、試作（1回目・2回目…）を配合・評価とともに記録できます。"}</div></div>`;
+  return `<div class="mgrid">${list.map(themeCard).join("")}</div>`;
+}
+function themeCard(th){
+  const trials=th.trials||[];const last=trials[trials.length-1];
+  const hyd=last?hydration(last.ingredients):null;
+  return `<div class="mcard" data-open-theme="${th.id}">
+    <div class="top"><h3>${esc(th.name)}</h3></div>
+    ${th.desc?`<div class="mdesc">${esc(th.desc)}</div>`:""}
+    ${last?`<div style="background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span class="rnd-badge">${last.seq}回目</span>${last.rating?stars(last.rating):""}${hyd!=null?`<span class="hyd" style="margin-left:auto">加水率 ${hyd}%</span>`:""}</div>
+      <div class="ing-line">${esc(ingSummary(last.ingredients))||"（配合未記入）"}</div>
+    </div>`:`<div style="font-size:12.5px;color:var(--faint)">まだ試作記録がありません</div>`}
+    <div class="foot">
+      <span class="g"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3"/></svg>試作 ${trials.length} 回</span>
+      <span class="g" style="margin-left:auto">${fmtWhen(th.updatedAt||th.createdAt)}</span>
+    </div>
+  </div>`;
+}
+
+function openThemeForm(id){
+  const th=id?state.rnd.find(x=>x.id===id):null;
+  openModal(`<div class="modal"><div class="modal-head"><h2>${th?"テーマを編集":"研究テーマを追加"}</h2><button class="x">×</button></div>
+  <div class="modal-body">
+    <div class="field"><label>テーマ名 *</label><input id="th-name" value="${th?esc(th.name):""}" placeholder="例）二八そばの加水率を最適化する"></div>
+    <div class="field"><label>目的・概要</label><textarea id="th-desc" placeholder="何を検証したいか、狙い・条件など">${th?esc(th.desc||""):""}</textarea></div>
+  </div>
+  <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">保存</button></div></div>`);
+  $("#th-name").focus();$("#c").onclick=closeModal;
+  $("#s").onclick=async()=>{
+    const name=$("#th-name").value.trim();if(!name){$("#th-name").focus();return;}
+    const desc=$("#th-desc").value.trim();
+    if(!await ensureMe())return;
+    try{ const r=await api("POST","/rnd/themes",{id:th?th.id:undefined,name,desc,by:state.me}); await reload();
+      if(th){closeModal();render();toast("更新しました");}
+      else{closeModal();setView("rnd");toast("テーマを追加しました");openTheme(r.id);} }
+    catch(e){toast("エラー: "+e.message);}
+  };
+}
+
+function openTheme(id){state.openTheme=id;renderThemeModal();}
+function refreshTheme(){if(state.openTheme&&!$("#overlay").hidden&&$("#modal-root [data-kind='theme-detail']"))renderThemeModal();}
+function curTheme(){return state.rnd.find(t=>t.id===state.openTheme);}
+function renderThemeModal(){
+  const th=curTheme();if(!th){if(state.openTheme)closeModal();return;}
+  const trials=(th.trials||[]).slice().sort((a,b)=>b.seq-a.seq);
+  openModal(`<div class="modal wide" data-kind="theme-detail"><div class="modal-head">
+    <div style="flex:1"><div class="eb" style="color:var(--gold-ink);font-size:11px;font-weight:700;letter-spacing:.08em">RESEARCH THEME</div><h2>${esc(th.name)}</h2></div>
+    <button class="btn ghost sm" id="th-edit" title="編集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+    <button class="x">×</button></div>
+  <div class="modal-body">
+    ${th.desc?`<p style="color:var(--muted);margin:0 0 8px;white-space:pre-wrap">${esc(th.desc)}</p>`:""}
+    <div class="md-meta"><span style="font-size:11.5px;color:var(--faint)">作成: ${esc(th.createdBy||"—")} ・ ${fmtWhen(th.createdAt)} ・ 試作 ${(th.trials||[]).length} 回</span>
+    <button class="btn danger sm" id="th-del" style="margin-left:auto">テーマを削除</button></div>
+    <div class="md-sec"><h4>試作記録 <span class="ct">${(th.trials||[]).length}回</span><button class="btn pri sm" id="add-trial" style="margin-left:auto">＋ 試作を記録</button></h4>
+      <div>${trials.length?trials.map(tr=>trialCard(th,tr)).join(""):`<div style="font-size:12.5px;color:var(--faint)">まだ試作記録がありません。「＋ 試作を記録」から1回目を登録しましょう。</div>`}</div>
+    </div>
+  </div></div>`);
+  $("#th-edit").onclick=()=>openThemeForm(th.id);
+  $("#th-del").onclick=async()=>{if(confirm("このテーマと全ての試作記録・写真を削除しますか？")){try{await api("DELETE","/rnd/themes/"+th.id);await reload();closeModal();render();toast("削除しました");}catch(e){toast("エラー: "+e.message);}}};
+  $("#add-trial").onclick=()=>openTrialForm(th.id);
+  $("#modal-root").querySelectorAll("[data-trial-edit]").forEach(el=>el.onclick=()=>openTrialForm(th.id,el.dataset.trialEdit));
+  $("#modal-root").querySelectorAll("[data-trial-del]").forEach(el=>el.onclick=()=>delTrial(el.dataset.trialDel));
+  $("#modal-root").querySelectorAll("[data-trial-photo]").forEach(el=>{const id=el.dataset.trialPhoto;el.onclick=()=>{const fi=document.createElement("input");fi.type="file";fi.multiple=true;fi.accept="image/*";fi.onchange=()=>uploadTrialPhotos(id,[...fi.files]);fi.click();};});
+  $("#modal-root").querySelectorAll("[data-rmphoto]").forEach(el=>el.onclick=()=>removeTrialPhoto(el.dataset.rmphoto));
+}
+function trialCard(th,tr){
+  const hyd=hydration(tr.ingredients);const ings=(tr.ingredients||[]).filter(i=>i.name);
+  const photos=tr.photos||[];
+  return `<div class="trial">
+    <div class="trial-h"><span class="rnd-badge">${tr.seq}回目</span>${tr.rating?stars(tr.rating):`<span style="font-size:11.5px;color:var(--faint)">未評価</span>`}
+      ${hyd!=null?`<span class="hyd">加水率 ${hyd}%</span>`:""}
+      <div class="trial-acts">
+        <button class="btn ghost sm" data-trial-photo="${tr.id}" title="写真を追加"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+        <button class="btn ghost sm" data-trial-edit="${tr.id}" title="編集"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+        <button class="btn danger sm" data-trial-del="${tr.id}" title="削除">×</button>
+      </div>
+      <div class="meta">${esc(tr.createdBy||"")}<br>${fmtWhen(tr.createdAt)}</div>
+    </div>
+    <div class="trial-b">
+      <div><div class="lab">配合</div><div>${ings.length?ings.map(i=>`<span class="ing-tag">${esc(i.name)}${(i.amount!==""&&i.amount!=null)?` <b>${esc(i.amount)}${esc(i.unit||"")}</b>`:""}</span>`).join(""):`<span style="color:var(--faint);font-size:12.5px">未記入</span>`}</div></div>
+      ${tr.method?`<div><div class="lab">工程・作り方</div><div class="val">${esc(tr.method)}</div></div>`:""}
+      ${tr.result?`<div><div class="lab">結果・所感</div><div class="val">${esc(tr.result)}</div></div>`:""}
+      ${photos.length?`<div><div class="lab">写真</div><div class="trial-photos">${photos.map(p=>`<div class="tp"><a href="/file/${p.id}" target="_blank" rel="noopener"><img src="/file/${p.id}" alt="" loading="lazy"></a><button class="rm" data-rmphoto="${p.id}" title="削除">×</button></div>`).join("")}</div></div>`:""}
+    </div>
+  </div>`;
+}
+
+let trialIngs=[];
+function ingRowHtml(i){return `<div class="ing-row">
+  <input class="ing-name" placeholder="材料名（例：蕎麦粉）" value="${esc(i.name||"")}">
+  <input class="ing-amt" type="number" step="any" placeholder="分量" value="${i.amount!=null?esc(i.amount):""}">
+  <input class="ing-unit" placeholder="単位" value="${esc(i.unit||"")}">
+  <button class="del" title="削除">×</button></div>`;}
+function openTrialForm(themeId,trialId){
+  const th=state.rnd.find(x=>x.id===themeId);if(!th)return;
+  const tr=trialId?(th.trials||[]).find(x=>x.id===trialId):null;
+  let ings;
+  if(tr) ings=(tr.ingredients||[]).map(i=>({...i}));
+  else{ const last=(th.trials||[]).slice().sort((a,b)=>b.seq-a.seq)[0];
+    ings = last&&last.ingredients&&last.ingredients.length ? last.ingredients.map(i=>({...i}))
+      : [{name:"蕎麦粉",amount:"",unit:"g"},{name:"水",amount:"",unit:"ml"},{name:"そば皮",amount:"",unit:"g"}]; }
+  if(!ings.length)ings=[{name:"",amount:"",unit:""}];
+  let rating=tr?tr.rating||0:0;
+  const seq=tr?tr.seq:((th.trials||[]).reduce((m,x)=>Math.max(m,x.seq),0)+1);
+  openModal(`<div class="modal wide"><div class="modal-head"><div style="flex:1"><div class="eb" style="color:var(--gold-ink);font-size:11px;font-weight:700;letter-spacing:.08em">${esc(th.name)}</div><h2>${tr?tr.seq+"回目を編集":seq+"回目を記録"}</h2></div><button class="x">×</button></div>
+  <div class="modal-body">
+    <div class="field"><label>配合（材料と分量）</label><div id="ing-list">${ings.map(ingRowHtml).join("")}</div>
+      <button class="btn sm" id="add-ing" style="margin-top:2px">＋ 材料を追加</button>
+      <div class="hint" id="hyd-live"></div>
+    </div>
+    <div class="field"><label>工程・作り方 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-method" placeholder="こね方・加水の順番・茹で時間など">${tr?esc(tr.method||""):""}</textarea></div>
+    <div class="field"><label>結果・所感 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-result" placeholder="食感・風味・のど越し・課題・次への改善点など">${tr?esc(tr.result||""):""}</textarea></div>
+    <div class="field"><label>総合評価</label><div class="rate-pick" id="rate">${[1,2,3,4,5].map(n=>`<span class="s ${n<=rating?"on":""}" data-n="${n}">★</span>`).join("")}</div></div>
+  </div>
+  <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">${tr?"更新":"記録する"}</button></div></div>`);
+  const list=$("#ing-list");
+  function updHyd(){const cur=collectIngs();const h=hydration(cur);$("#hyd-live").innerHTML=h!=null?`加水率（水 ÷ 粉）＝ <b style="color:var(--gold-ink)">${h}%</b>`:"※ 「◯◯粉」と「水」を入力すると加水率を自動計算します";}
+  function wireRows(){list.querySelectorAll(".del").forEach(b=>b.onclick=()=>{if(list.querySelectorAll(".ing-row").length>1)b.closest(".ing-row").remove();else b.closest(".ing-row").querySelectorAll("input").forEach(i=>i.value="");updHyd();});
+    list.querySelectorAll("input").forEach(i=>i.oninput=updHyd);}
+  function collectIngs(){return [...list.querySelectorAll(".ing-row")].map(r=>({name:r.querySelector(".ing-name").value.trim(),amount:r.querySelector(".ing-amt").value.trim(),unit:r.querySelector(".ing-unit").value.trim()})).filter(i=>i.name||i.amount);}
+  wireRows();updHyd();
+  $("#add-ing").onclick=()=>{list.insertAdjacentHTML("beforeend",ingRowHtml({name:"",amount:"",unit:""}));wireRows();};
+  $("#rate").querySelectorAll(".s").forEach(s=>s.onclick=()=>{rating=+s.dataset.n===rating?0:+s.dataset.n;$("#rate").querySelectorAll(".s").forEach(x=>x.classList.toggle("on",+x.dataset.n<=rating));});
+  $("#c").onclick=()=>{state.openTheme=themeId;renderThemeModal();};
+  $("#s").onclick=async()=>{
+    const payload={ingredients:collectIngs(),method:$("#tr-method").value.trim(),result:$("#tr-result").value.trim(),rating,by:state.me};
+    if(!await ensureMe())return;payload.by=state.me;
+    try{
+      if(tr) await api("POST","/rnd/trials/"+tr.id,payload);
+      else await api("POST","/rnd/themes/"+themeId+"/trials",payload);
+      await reload();state.openTheme=themeId;renderThemeModal();render();toast(tr?"更新しました":"試作を記録しました");
+    }catch(e){toast("エラー: "+e.message);}
+  };
+}
+async function delTrial(trialId){
+  if(!confirm("この試作記録を削除しますか？"))return;
+  try{ await api("DELETE","/rnd/trials/"+trialId); await reload(); renderThemeModal(); render(); toast("削除しました"); }
+  catch(e){toast("エラー: "+e.message);}
+}
+async function uploadTrialPhotos(trialId,files){
+  if(!files.length)return;if(!await ensureMe())return;
+  for(const file of files){
+    if(!(file.type||"").startsWith("image")){toast("画像を選んでください");continue;}
+    if(file.size>25*1048576){toast("25MBを超えています");continue;}
+    toast("アップロード中…");
+    try{const fd=new FormData();fd.append("file",file);fd.append("name",file.name);fd.append("by",state.me);if(file.type)fd.append("contentType",file.type);
+      await api("POST","/rnd/trials/"+trialId+"/files",fd,true);}catch(e){toast("失敗: "+e.message);}
+  }
+  await reload();renderThemeModal();toast("写真を追加しました");
+}
+async function removeTrialPhoto(fileId){
+  if(!confirm("この写真を削除しますか？"))return;
+  try{ await api("DELETE","/files/"+fileId); await reload(); renderThemeModal(); toast("削除しました"); }
   catch(e){toast("エラー: "+e.message);}
 }
 </script>
