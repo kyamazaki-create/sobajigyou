@@ -130,9 +130,16 @@ a{color:inherit}
 .av-mini{width:22px;height:22px;border-radius:50%;background:var(--gold-soft);color:var(--gold-ink);display:inline-grid;place-items:center;font-size:10.5px;font-weight:700;flex:none}
 
 .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:18px}
-.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 19px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 19px;display:flex;flex-direction:column;gap:11px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;overflow:hidden}
 .mcard:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 14px 34px rgba(40,30,10,.12)}
 .mcard h3{font-size:15.5px;line-height:1.35;font-weight:700}
+.card-cover{margin:-18px -19px 2px;position:relative;height:156px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.card-cover>img{width:100%;height:100%;object-fit:cover;display:block}
+.card-cover.multi{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:2px;height:156px}
+.card-cover.multi>img{width:100%;height:100%;object-fit:cover}
+.card-cover.multi>img:first-child{grid-row:1 / span 2}
+.card-cover .cnt{position:absolute;right:9px;bottom:9px;background:rgba(22,39,60,.8);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;z-index:2}
+.card-cover .filetag{position:absolute;left:9px;bottom:9px;background:rgba(255,255,255,.92);color:var(--ink);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;z-index:2}
 .mcard .mdesc{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mcard .foot{display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--faint);margin-top:auto;flex-wrap:wrap}
 .mcard .foot .g{display:inline-flex;align-items:center;gap:4px}
@@ -594,14 +601,25 @@ function fileIcon(a){
   return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>`;
 }
 function attUrl(a){return a.kind==="link"?a.url:("/file/"+a.id);}
+function coverHtml(files){
+  const imgs=files.filter(f=>f.kind==="file"&&(f.contentType||"").startsWith("image"));
+  if(imgs.length){
+    const use=imgs.slice(0,3);const rest=files.length-1;
+    if(use.length===1) return `<div class="card-cover"><img src="${attUrl(use[0])}" alt="" loading="lazy">${files.length>1?`<span class="cnt">+${files.length-1}</span>`:""}</div>`;
+    return `<div class="card-cover multi">${use.map(f=>`<img src="${attUrl(f)}" alt="" loading="lazy">`).join("")}${files.length>use.length?`<span class="cnt">+${files.length-use.length}</span>`:""}</div>`;
+  }
+  if(files.length){const f=files[0];
+    return `<div class="card-cover" style="display:grid;place-items:center"><div style="text-align:center;color:var(--muted);padding:0 14px"><div style="transform:scale(1.7);margin-bottom:10px">${fileIcon(f)}</div><div style="font-size:11.5px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</div></div>${files.length>1?`<span class="cnt">全${files.length}件</span>`:""}</div>`;}
+  return "";
+}
 function matCard(m){
-  const files=m.files||[];const imgs=files.filter(f=>f.kind==="file"&&(f.contentType||"").startsWith("image")).slice(0,4);
+  const files=m.files||[];
   const tasks=state.tasks.filter(t=>t.materialId===m.id&&t.status!=="完了").length;
   return `<div class="mcard" data-open-mat="${m.id}">
+    ${coverHtml(files)}
     <h3>${esc(m.title)}</h3>
     <span class="chip" style="align-self:flex-start"><span class="dot" style="background:${projColor(m.projectId)}"></span>${esc(projName(m.projectId))}</span>
     ${m.desc?`<div class="mdesc">${esc(m.desc)}</div>`:""}
-    ${imgs.length?`<div class="thumbs">${imgs.map(f=>`<img class="thumb" src="${attUrl(f)}" alt="" loading="lazy">`).join("")}${files.length>imgs.length?`<div class="thumb ic">+${files.length-imgs.length}</div>`:""}</div>`:""}
     <div class="foot">
       <span class="g">${fileIcon({kind:"file",contentType:""})}${files.length} 添付</span>
       <span class="g"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${(m.notes||[]).length} 追記</span>
@@ -951,7 +969,9 @@ function viewRnd(){
 function themeCard(th){
   const trials=th.trials||[];const last=trials[trials.length-1];
   const hyd=last?hydration(last.ingredients):null;
+  const photos=trials.slice().sort((a,b)=>b.seq-a.seq).flatMap(t=>t.photos||[]);
   return `<div class="mcard" data-open-theme="${th.id}">
+    ${photos.length?coverHtml(photos):""}
     <div class="top"><h3>${esc(th.name)}</h3></div>
     ${th.desc?`<div class="mdesc">${esc(th.desc)}</div>`:""}
     ${last?`<div style="background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px">
