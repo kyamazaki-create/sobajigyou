@@ -282,6 +282,10 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 .rate-pick .s{transition:transform .1s}
 .rate-pick .s.on{color:var(--gold)}
 .rate-pick .s:hover{transform:scale(1.15)}
+.ph-add{width:64px;height:64px;border-radius:8px;border:1.5px dashed var(--line-strong);background:var(--surface-2);color:var(--muted);font-size:11px;line-height:1.25;cursor:pointer;display:grid;place-items:center;text-align:center}
+.ph-add:hover{border-color:var(--gold);color:var(--gold-ink)}
+.trial-photos .tp.gone img{opacity:.32;filter:grayscale(1)}
+.trial-photos .tp .rm{cursor:pointer}
 @media (max-width:760px){.ing-row{grid-template-columns:1fr 70px 56px 28px;gap:6px}}
 
 /* ---------- login ---------- */
@@ -1054,6 +1058,11 @@ function openTrialForm(themeId,trialId){
     </div>
     <div class="field"><label>工程・作り方 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-method" placeholder="こね方・加水の順番・茹で時間など">${tr?esc(tr.method||""):""}</textarea></div>
     <div class="field"><label>結果・所感 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-result" placeholder="食感・風味・のど越し・課題・次への改善点など">${tr?esc(tr.result||""):""}</textarea></div>
+    <div class="field"><label>写真 <span style="color:var(--faint);font-weight:400">任意</span></label>
+      <div class="trial-photos" id="ph-grid"></div>
+      <input type="file" id="ph-input" accept="image/*" multiple hidden>
+      <div class="hint">見た目・切り口・食感の記録に。複数枚OK（1枚25MBまで）。</div>
+    </div>
     <div class="field"><label>総合評価</label><div class="rate-pick" id="rate">${[1,2,3,4,5].map(n=>`<span class="s ${n<=rating?"on":""}" data-n="${n}">★</span>`).join("")}</div></div>
   </div>
   <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">${tr?"更新":"記録する"}</button></div></div>`);
@@ -1065,15 +1074,48 @@ function openTrialForm(themeId,trialId){
   wireRows();updHyd();
   $("#add-ing").onclick=()=>{list.insertAdjacentHTML("beforeend",ingRowHtml({name:"",amount:"",unit:""}));wireRows();};
   $("#rate").querySelectorAll(".s").forEach(s=>s.onclick=()=>{rating=+s.dataset.n===rating?0:+s.dataset.n;$("#rate").querySelectorAll(".s").forEach(x=>x.classList.toggle("on",+x.dataset.n<=rating));});
+
+  // ---- 写真: 既存 + 未アップロード(staged) ----
+  let staged=[];
+  let existing=tr?(tr.photos||[]).map(p=>({...p,del:false})):[];
+  function renderPhotos(){
+    const g=$("#ph-grid");let h="";
+    existing.forEach((p,i)=>{h+=`<div class="tp ${p.del?"gone":""}"><a href="/file/${p.id}" target="_blank" rel="noopener"><img src="/file/${p.id}" alt=""></a><button class="rm" data-ex="${i}" title="${p.del?"戻す":"削除"}">${p.del?"↺":"×"}</button></div>`;});
+    staged.forEach((s,i)=>{h+=`<div class="tp"><img src="${s.url}" alt=""><button class="rm" data-st="${i}" title="取り消し">×</button></div>`;});
+    h+=`<button type="button" class="ph-add" id="ph-add">＋<br>写真</button>`;
+    g.innerHTML=h;
+    g.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{existing[+b.dataset.ex].del=!existing[+b.dataset.ex].del;renderPhotos();});
+    g.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const i=+b.dataset.st;URL.revokeObjectURL(staged[i].url);staged.splice(i,1);renderPhotos();});
+    $("#ph-add").onclick=()=>$("#ph-input").click();
+  }
+  $("#ph-input").onchange=()=>{
+    for(const f of $("#ph-input").files){
+      if(!(f.type||"").startsWith("image")){toast("画像を選んでください");continue;}
+      if(f.size>25*1048576){toast("25MBを超えています（"+f.name+"）");continue;}
+      staged.push({file:f,url:URL.createObjectURL(f)});
+    }
+    $("#ph-input").value="";renderPhotos();
+  };
+  renderPhotos();
+
   $("#c").onclick=()=>{state.openTheme=themeId;renderThemeModal();};
   $("#s").onclick=async()=>{
     const payload={ingredients:collectIngs(),method:$("#tr-method").value.trim(),result:$("#tr-result").value.trim(),rating,by:state.me};
     if(!await ensureMe())return;payload.by=state.me;
+    const btn=$("#s");btn.disabled=true;btn.textContent="保存中…";
     try{
-      if(tr) await api("POST","/rnd/trials/"+tr.id,payload);
-      else await api("POST","/rnd/themes/"+themeId+"/trials",payload);
+      let tid;
+      if(tr){ await api("POST","/rnd/trials/"+tr.id,payload); tid=tr.id; }
+      else { const r=await api("POST","/rnd/themes/"+themeId+"/trials",payload); tid=r.id; }
+      for(const s of staged){
+        const fd=new FormData();fd.append("file",s.file);fd.append("name",s.file.name);fd.append("by",state.me);
+        if(s.file.type)fd.append("contentType",s.file.type);
+        await api("POST","/rnd/trials/"+tid+"/files",fd,true);
+        URL.revokeObjectURL(s.url);
+      }
+      for(const p of existing.filter(x=>x.del)) await api("DELETE","/files/"+p.id);
       await reload();state.openTheme=themeId;renderThemeModal();render();toast(tr?"更新しました":"試作を記録しました");
-    }catch(e){toast("エラー: "+e.message);}
+    }catch(e){toast("エラー: "+e.message);btn.disabled=false;btn.textContent=tr?"更新":"記録する";}
   };
 }
 async function delTrial(trialId){
