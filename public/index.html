@@ -287,6 +287,15 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 .rate-pick .s{transition:transform .1s}
 .rate-pick .s.on{color:var(--gold)}
 .rate-pick .s:hover{transform:scale(1.15)}
+.eval-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ev{display:flex;flex-direction:column;gap:6px}
+.ev .evl{font-size:11.5px;font-weight:700;color:var(--muted)}
+.ev select{padding:9px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface-2);color:var(--ink);width:100%}
+.ev .rate-pick{font-size:22px}
+.eval-chips{display:flex;flex-wrap:wrap;gap:5px}
+.eval-chips .ec{display:inline-block;background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:2px 9px;font-size:12px;color:var(--body)}
+.eval-chips .ec b{color:var(--ink)}
+@media (max-width:760px){.eval-grid{grid-template-columns:1fr}}
 .ph-add{width:64px;height:64px;border-radius:8px;border:1.5px dashed var(--line-strong);background:var(--surface-2);color:var(--muted);font-size:11px;line-height:1.25;cursor:pointer;display:grid;place-items:center;text-align:center}
 .ph-add:hover{border-color:var(--gold);color:var(--gold-ink)}
 .trial-photos .tp.gone img{opacity:.32;filter:grayscale(1)}
@@ -422,6 +431,8 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 "use strict";
 const STATUS=["未着手","進行中","完了"];
 const PRIORITIES=["低","通常","高","最優先"];
+const AROMA_OPTS=["◎ 強い・良い","○ ややあり","△ 普通","▲ やや弱い","✕ 弱い"];
+const TIE_OPTS=["強い","やや強い","普通","やや弱い","弱い"];
 const PALETTE=["#bd8b40","#3a5f86","#3f7d54","#7c5cbf","#b2482f","#0e7c86","#b8407a","#5f7a2e"];
 const state={projects:[],materials:[],tasks:[],rnd:[],view:"dashboard",pf:null,q:"",me:localStorage.getItem("kanri_me")||"",
   tSort:"due",tDir:"asc",tStatus:"all",openMat:null,openTheme:null,loginMode:false,formOpen:false};
@@ -1054,6 +1065,11 @@ function trialCard(th,tr){
     </div>
     <div class="trial-b">
       <div><div class="lab">配合</div><div>${ings.length?ings.map(i=>`<span class="ing-tag">${esc(i.name)}${(i.amount!==""&&i.amount!=null)?` <b>${esc(i.amount)}${esc(i.unit||"")}</b>`:""}</span>`).join(""):`<span style="color:var(--faint);font-size:12.5px">未記入</span>`}</div></div>
+      ${(tr.aroma||tr.tieBefore||tr.tieAfter)?`<div><div class="lab">官能評価</div><div class="eval-chips">
+        ${tr.aroma?`<span class="ec">香り <b>${esc(tr.aroma)}</b></span>`:""}
+        ${tr.tieBefore?`<span class="ec">前つながり <b>${esc(tr.tieBefore)}</b></span>`:""}
+        ${tr.tieAfter?`<span class="ec">後つながり <b>${esc(tr.tieAfter)}</b></span>`:""}
+      </div></div>`:""}
       ${tr.method?`<div><div class="lab">工程・作り方</div><div class="val">${esc(tr.method)}</div></div>`:""}
       ${tr.result?`<div><div class="lab">結果・所感</div><div class="val">${esc(tr.result)}</div></div>`:""}
       ${photos.length?`<div><div class="lab">写真</div><div class="trial-photos">${photos.map(p=>`<div class="tp"><a href="/file/${p.id}" target="_blank" rel="noopener"><img src="/file/${p.id}" alt="" loading="lazy"></a><button class="rm" data-rmphoto="${p.id}" title="削除">×</button></div>`).join("")}</div></div>`:""}
@@ -1085,13 +1101,20 @@ function openTrialForm(themeId,trialId){
       <div class="hint" id="hyd-live"></div>
     </div>
     <div class="field"><label>工程・作り方 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-method" placeholder="こね方・加水の順番・茹で時間など">${tr?esc(tr.method||""):""}</textarea></div>
-    <div class="field"><label>結果・所感 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-result" placeholder="食感・風味・のど越し・課題・次への改善点など">${tr?esc(tr.result||""):""}</textarea></div>
+    <div class="field"><label>官能評価</label>
+      <div class="eval-grid">
+        <div class="ev"><span class="evl">香り</span><select id="ev-aroma"><option value="">（未評価）</option>${AROMA_OPTS.map(o=>`<option ${tr&&tr.aroma===o?"selected":""}>${o}</option>`).join("")}</select></div>
+        <div class="ev"><span class="evl">総合</span><div class="rate-pick" id="rate">${[1,2,3,4,5].map(n=>`<span class="s ${n<=rating?"on":""}" data-n="${n}">★</span>`).join("")}</div></div>
+        <div class="ev"><span class="evl">茹でる前のつながり</span><select id="ev-tieb"><option value="">（未評価）</option>${TIE_OPTS.map(o=>`<option ${tr&&tr.tieBefore===o?"selected":""}>${o}</option>`).join("")}</select></div>
+        <div class="ev"><span class="evl">茹でた後のつながり</span><select id="ev-tiea"><option value="">（未評価）</option>${TIE_OPTS.map(o=>`<option ${tr&&tr.tieAfter===o?"selected":""}>${o}</option>`).join("")}</select></div>
+      </div>
+    </div>
+    <div class="field"><label>結果・所感 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="tr-result" placeholder="その他の気づき・課題・次への改善点など">${tr?esc(tr.result||""):""}</textarea></div>
     <div class="field"><label>写真 <span style="color:var(--faint);font-weight:400">任意</span></label>
       <div class="trial-photos" id="ph-grid"></div>
       <input type="file" id="ph-input" accept="image/*" multiple hidden>
       <div class="hint">見た目・切り口・食感の記録に。複数枚OK（1枚25MBまで）。</div>
     </div>
-    <div class="field"><label>総合評価</label><div class="rate-pick" id="rate">${[1,2,3,4,5].map(n=>`<span class="s ${n<=rating?"on":""}" data-n="${n}">★</span>`).join("")}</div></div>
   </div>
   <div class="modal-foot"><button class="btn" id="c">キャンセル</button><button class="btn pri" id="s">${tr?"更新":"記録する"}</button></div></div>`);
   const list=$("#ing-list");
@@ -1128,7 +1151,8 @@ function openTrialForm(themeId,trialId){
 
   $("#c").onclick=()=>{state.openTheme=themeId;renderThemeModal();};
   $("#s").onclick=async()=>{
-    const payload={ingredients:collectIngs(),method:$("#tr-method").value.trim(),result:$("#tr-result").value.trim(),rating,by:state.me};
+    const payload={ingredients:collectIngs(),method:$("#tr-method").value.trim(),result:$("#tr-result").value.trim(),rating,
+      aroma:$("#ev-aroma").value,tieBefore:$("#ev-tieb").value,tieAfter:$("#ev-tiea").value,by:state.me};
     if(!await ensureMe())return;payload.by=state.me;
     const btn=$("#s");btn.disabled=true;btn.textContent="保存中…";
     try{

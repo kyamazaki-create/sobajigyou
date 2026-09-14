@@ -207,16 +207,16 @@ async function route(req, env, url) {
     const mx = await DB.prepare("SELECT MAX(seq) AS mx FROM rnd_trials WHERE theme_id=?").bind(themeId).first();
     const seq = (mx && mx.mx ? mx.mx : 0) + 1;
     const id = uid();
-    await DB.prepare("INSERT INTO rnd_trials (id,theme_id,seq,ingredients,method,result,rating,created_by,created_at) VALUES (?,?,?,?,?,?,?,?,?)")
-      .bind(id, themeId, seq, JSON.stringify(b.ingredients || []), b.method || "", b.result || "", b.rating || 0, b.by || "", nowISO()).run();
+    await DB.prepare("INSERT INTO rnd_trials (id,theme_id,seq,ingredients,method,result,rating,aroma,tie_before,tie_after,created_by,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(id, themeId, seq, JSON.stringify(b.ingredients || []), b.method || "", b.result || "", b.rating || 0, b.aroma || "", b.tieBefore || "", b.tieAfter || "", b.by || "", nowISO()).run();
     await DB.prepare("UPDATE rnd_themes SET updated_at=? WHERE id=?").bind(nowISO(), themeId).run();
     return json({ id, seq });
   }
   let rtu = p.match(/^\/api\/rnd\/trials\/([^/]+)$/);
   if (rtu && m === "POST") {
     const b = await req.json();
-    await DB.prepare("UPDATE rnd_trials SET ingredients=?, method=?, result=?, rating=? WHERE id=?")
-      .bind(JSON.stringify(b.ingredients || []), b.method || "", b.result || "", b.rating || 0, rtu[1]).run();
+    await DB.prepare("UPDATE rnd_trials SET ingredients=?, method=?, result=?, rating=?, aroma=?, tie_before=?, tie_after=? WHERE id=?")
+      .bind(JSON.stringify(b.ingredients || []), b.method || "", b.result || "", b.rating || 0, b.aroma || "", b.tieBefore || "", b.tieAfter || "", rtu[1]).run();
     const row = await DB.prepare("SELECT theme_id FROM rnd_trials WHERE id=?").bind(rtu[1]).first();
     if (row) await DB.prepare("UPDATE rnd_themes SET updated_at=? WHERE id=?").bind(nowISO(), row.theme_id).run();
     return json({ ok: true });
@@ -310,7 +310,8 @@ async function getState(DB) {
       id: th.id, name: th.name, desc: th.descr, createdBy: th.created_by, createdAt: th.created_at, updatedAt: th.updated_at,
       trials: rndTrials.results.filter((tr) => tr.theme_id === th.id).map((tr) => ({
         id: tr.id, seq: tr.seq, ingredients: safeJson(tr.ingredients, []), method: tr.method,
-        result: tr.result, rating: tr.rating || 0, createdBy: tr.created_by, createdAt: tr.created_at,
+        result: tr.result, rating: tr.rating || 0, aroma: tr.aroma || "", tieBefore: tr.tie_before || "", tieAfter: tr.tie_after || "",
+        createdBy: tr.created_by, createdAt: tr.created_at,
         photos: filesByMat[tr.id] || [],
       })),
     })),

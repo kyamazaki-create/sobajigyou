@@ -70,7 +70,10 @@ CREATE TABLE IF NOT EXISTS rnd_trials (
   ingredients TEXT,           -- JSON: [{name, amount, unit}]
   method      TEXT,
   result      TEXT,
-  rating      INTEGER DEFAULT 0,
+  rating      INTEGER DEFAULT 0,  -- 総合(★1-5)
+  aroma       TEXT,               -- 香り
+  tie_before  TEXT,               -- 茹でる前のつながり
+  tie_after   TEXT,               -- 茹でた後のつながり
   created_by  TEXT,
   created_at  TEXT
 );
