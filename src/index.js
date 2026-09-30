@@ -229,6 +229,29 @@ async function route(req, env, url) {
   let rtf = p.match(/^\/api\/rnd\/trials\/([^/]+)\/files$/);
   if (rtf && m === "POST") return uploadFile(req, env, rtf[1]);
 
+  // ---- 蕎麦前 ----
+  if (p === "/api/sobamae" && m === "POST") {
+    const b = await req.json();
+    const now = nowISO();
+    if (b.id) {
+      await DB.prepare("UPDATE sobamae SET name=?, category=?, ingredients=?, method=?, status=?, rating=?, memo=?, updated_at=? WHERE id=?")
+        .bind(b.name || "無題", b.category || "", JSON.stringify(b.ingredients || []), b.method || "", b.status || "検討中", b.rating || 0, b.memo || "", now, b.id).run();
+      return json({ id: b.id });
+    }
+    const id = uid();
+    await DB.prepare("INSERT INTO sobamae (id,name,category,ingredients,method,status,rating,memo,created_by,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(id, b.name || "無題", b.category || "", JSON.stringify(b.ingredients || []), b.method || "", b.status || "検討中", b.rating || 0, b.memo || "", b.by || "", now, now).run();
+    return json({ id });
+  }
+  let sm = p.match(/^\/api\/sobamae\/([^/]+)$/);
+  if (sm && m === "DELETE") {
+    await deleteTrialFiles(env, sm[1]);
+    await DB.prepare("DELETE FROM sobamae WHERE id=?").bind(sm[1]).run();
+    return json({ ok: true });
+  }
+  let smf = p.match(/^\/api\/sobamae\/([^/]+)\/files$/);
+  if (smf && m === "POST") return uploadFile(req, env, smf[1]);
+
   return json({ error: "not_found" }, 404);
 }
 
@@ -275,7 +298,7 @@ async function serveFile(env, fileId) {
 }
 
 async function getState(DB) {
-  const [projects, materials, files, notes, tasks, rndThemes, rndTrials] = await Promise.all([
+  const [projects, materials, files, notes, tasks, rndThemes, rndTrials, sobamaeRows] = await Promise.all([
     DB.prepare("SELECT * FROM projects ORDER BY ord, created_at").all(),
     DB.prepare("SELECT * FROM materials").all(),
     DB.prepare("SELECT * FROM files").all(),
@@ -283,6 +306,7 @@ async function getState(DB) {
     DB.prepare("SELECT * FROM tasks").all(),
     DB.prepare("SELECT * FROM rnd_themes").all(),
     DB.prepare("SELECT * FROM rnd_trials ORDER BY seq").all(),
+    DB.prepare("SELECT * FROM sobamae").all(),
   ]);
   const filesByMat = {}, notesByMat = {};
   for (const f of files.results) {
@@ -314,6 +338,12 @@ async function getState(DB) {
         createdBy: tr.created_by, createdAt: tr.created_at,
         photos: filesByMat[tr.id] || [],
       })),
+    })),
+    sobamae: sobamaeRows.results.map((s) => ({
+      id: s.id, name: s.name, category: s.category, ingredients: safeJson(s.ingredients, []),
+      method: s.method, status: s.status || "検討中", rating: s.rating || 0, memo: s.memo,
+      createdBy: s.created_by, createdAt: s.created_at, updatedAt: s.updated_at,
+      photos: filesByMat[s.id] || [],
     })),
   });
 }

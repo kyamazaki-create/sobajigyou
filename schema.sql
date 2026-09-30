@@ -78,6 +78,21 @@ CREATE TABLE IF NOT EXISTS rnd_trials (
   created_at  TEXT
 );
 
+-- 蕎麦前（酒肴・一品）開発
+CREATE TABLE IF NOT EXISTS sobamae (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  category    TEXT,
+  ingredients TEXT,               -- JSON: [{name, amount, unit}]
+  method      TEXT,
+  status      TEXT,               -- 検討中/試作中/採用/見送り
+  rating      INTEGER DEFAULT 0,
+  memo        TEXT,               -- 試食メモ
+  created_by  TEXT,
+  created_at  TEXT,
+  updated_at  TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_files_mat ON files(material_id);
 CREATE INDEX IF NOT EXISTS idx_notes_mat ON notes(material_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_mat ON tasks(material_id);

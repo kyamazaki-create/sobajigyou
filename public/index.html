@@ -287,6 +287,10 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
 .rate-pick .s{transition:transform .1s}
 .rate-pick .s.on{color:var(--gold)}
 .rate-pick .s:hover{transform:scale(1.15)}
+.pill.sm-検討中{background:var(--surface-2);color:var(--muted);border:1px solid var(--line-strong)}
+.pill.sm-試作中{background:var(--gold-soft);color:var(--gold-ink);border:1px solid #e6d3a8}
+.pill.sm-採用{background:var(--ok-soft);color:var(--ok)}
+.pill.sm-見送り{background:var(--danger-soft);color:var(--danger)}
 .eval-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ev{display:flex;flex-direction:column;gap:6px}
 .ev .evl{font-size:11.5px;font-weight:700;color:var(--muted)}
@@ -384,6 +388,7 @@ table.tasks tbody tr:hover{background:var(--surface-2)}
       <button data-view="materials"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l2-2h5l2 2h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z"/></svg>資料<span class="ct" id="ct-mat"></span></button>
       <button data-view="tasks"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h11"/></svg>タスク<span class="ct" id="ct-task"></span></button>
       <button data-view="rnd"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3"/><path d="M7.5 14h9"/></svg>研究・開発<span class="ct" id="ct-rnd"></span></button>
+      <button data-view="sobamae"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16M6 3v3a6 6 0 0 0 12 0V3M12 12v6M8 21h8"/></svg>蕎麦前<span class="ct" id="ct-sm"></span></button>
     </nav>
     <div class="sec-label">カテゴリ・案件 <button id="add-cat" title="カテゴリを追加">＋</button></div>
     <div class="cats" id="cats"></div>
@@ -434,8 +439,10 @@ const PRIORITIES=["低","通常","高","最優先"];
 const AROMA_OPTS=["◎ 強い・良い","○ ややあり","△ 普通","▲ やや弱い","✕ 弱い"];
 const TIE_OPTS=["強い","やや強い","普通","やや弱い","弱い"];
 const PALETTE=["#bd8b40","#3a5f86","#3f7d54","#7c5cbf","#b2482f","#0e7c86","#b8407a","#5f7a2e"];
-const state={projects:[],materials:[],tasks:[],rnd:[],view:"dashboard",pf:null,q:"",me:localStorage.getItem("kanri_me")||"",
-  tSort:"due",tDir:"asc",tStatus:"all",openMat:null,openTheme:null,loginMode:false,formOpen:false};
+const SM_STATUS=["検討中","試作中","採用","見送り"];
+const SM_CATS=["酒肴","揚げ物","焼き物","そば味噌","和え物","そばがき","漬物","その他"];
+const state={projects:[],materials:[],tasks:[],rnd:[],sobamae:[],view:"dashboard",pf:null,q:"",me:localStorage.getItem("kanri_me")||"",
+  tSort:"due",tDir:"asc",tStatus:"all",smStatus:"all",openMat:null,openTheme:null,loginMode:false,formOpen:false};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nowISO=()=>new Date().toISOString();
@@ -465,6 +472,7 @@ async function reload(){
   state.materials=s.materials||[];
   state.tasks=s.tasks||[];
   state.rnd=s.rnd||[];
+  state.sobamae=s.sobamae||[];
 }
 
 /* ---------- boot ---------- */
@@ -489,7 +497,7 @@ function showLogin(){
 /* ---------- static bindings ---------- */
 function bindStatic(){
   $("#nav").addEventListener("click",e=>{const b=e.target.closest("button[data-view]");if(!b)return;setView(b.dataset.view);});
-  $("#primary-add").addEventListener("click",()=>{ if(state.view==="materials") openMaterialForm(); else if(state.view==="rnd") openThemeForm(); else openTaskForm(); });
+  $("#primary-add").addEventListener("click",()=>{ if(state.view==="materials") openMaterialForm(); else if(state.view==="rnd") openThemeForm(); else if(state.view==="sobamae") openSobamaeForm(); else openTaskForm(); });
   $("#add-cat").addEventListener("click",openCatForm);
   $("#set-me").addEventListener("click",promptName);
   $("#logout").addEventListener("click",async()=>{ try{await api("POST","/logout");}catch{} showLogin(); });
@@ -521,19 +529,22 @@ function render(){
   $("#ct-mat").textContent=state.materials.length||"";
   $("#ct-task").textContent=state.tasks.filter(t=>t.status!=="完了").length||"";
   $("#ct-rnd").textContent=state.rnd.length||"";
+  $("#ct-sm").textContent=state.sobamae.length||"";
   renderCats();
   const meta={dashboard:["DASHBOARD","ダッシュボード","全体の状況と、対応が必要なタスクをひと目で確認"],
     materials:["DOCUMENT LIBRARY","資料","写真・PDF・動画・Excel・リンクを案件ごとに整理。閲覧・追記できます"],
     tasks:["TASK MANAGEMENT","タスク","誰が・いつまでに・何を。担当と期限、進捗を一元管理"],
-    rnd:["RESEARCH & DEVELOPMENT","そば研究・開発","テーマごとに試作を記録。配合・工程・評価を回ごとに残して改良を積み重ねる"]};
+    rnd:["RESEARCH & DEVELOPMENT","そば研究・開発","テーマごとに試作を記録。配合・工程・評価を回ごとに残して改良を積み重ねる"],
+    sobamae:["SOBA-MAE DEVELOPMENT","蕎麦前","酒肴・一品料理の開発。分類・材料・作り方に、試食評価とステータスを添えて管理"]};
   $("#view-eb").textContent=meta[state.view][0];
   $("#view-title").textContent=meta[state.view][1];
   $("#view-desc").textContent=meta[state.view][2];
-  $("#primary-add").textContent = state.view==="materials"?"＋ 資料を追加":state.view==="rnd"?"＋ 研究テーマを追加":"＋ タスクを追加";
+  $("#primary-add").textContent = state.view==="materials"?"＋ 資料を追加":state.view==="rnd"?"＋ 研究テーマを追加":state.view==="sobamae"?"＋ 蕎麦前を追加":"＋ タスクを追加";
   const c=$("#content");
   if(state.view==="dashboard") c.innerHTML=viewDashboard();
   else if(state.view==="materials") c.innerHTML=viewMaterials();
   else if(state.view==="rnd") c.innerHTML=viewRnd();
+  else if(state.view==="sobamae") c.innerHTML=viewSobamae();
   else c.innerHTML=viewTasks();
   wireContent();
 }
@@ -701,6 +712,8 @@ function wireContent(){
   c.querySelectorAll("[data-open-mat]").forEach(el=>el.addEventListener("click",()=>openMaterial(el.dataset.openMat)));
   c.querySelectorAll("[data-open-task]").forEach(el=>el.addEventListener("click",()=>openTaskForm(el.dataset.openTask)));
   c.querySelectorAll("[data-open-theme]").forEach(el=>el.addEventListener("click",()=>openTheme(el.dataset.openTheme)));
+  c.querySelectorAll("[data-open-sm]").forEach(el=>el.addEventListener("click",()=>openSobamaeForm(el.dataset.openSm)));
+  const smseg=c.querySelector("#sm-seg");if(smseg)smseg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{state.smStatus=b.dataset.st;render();}));
   const seg=c.querySelector("#st-seg");if(seg)seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{state.tStatus=b.dataset.st;render();}));
   c.querySelectorAll("th.sortable").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.sort;if(state.tSort===k)state.tDir=state.tDir==="asc"?"desc":"asc";else{state.tSort=k;state.tDir="asc";}render();}));
 }
@@ -1190,6 +1203,102 @@ async function removeTrialPhoto(fileId){
   if(!confirm("この写真を削除しますか？"))return;
   try{ await api("DELETE","/files/"+fileId); await reload(); renderThemeModal(); toast("削除しました"); }
   catch(e){toast("エラー: "+e.message);}
+}
+
+/* ================= 蕎麦前 ================= */
+function matchSm(s){if(!state.q)return true;const q=state.q.toLowerCase();return (s.name||"").toLowerCase().includes(q)||(s.category||"").toLowerCase().includes(q)||(s.method||"").toLowerCase().includes(q)||(s.memo||"").toLowerCase().includes(q)||ingSummary(s.ingredients).toLowerCase().includes(q);}
+function viewSobamae(){
+  let list=state.sobamae.filter(matchSm).filter(s=>state.smStatus==="all"||s.status===state.smStatus)
+    .sort((a,b)=>(b.updatedAt||b.createdAt||"").localeCompare(a.updatedAt||a.createdAt||""));
+  const seg=`<div class="filters"><div class="seg" id="sm-seg">
+    <button data-st="all" class="${state.smStatus==="all"?"on":""}">すべて</button>
+    ${SM_STATUS.map(s=>`<button data-st="${s}" class="${state.smStatus===s?"on":""}">${s}</button>`).join("")}
+  </div><span style="font-size:12px;color:var(--faint);margin-left:auto">${list.length} 品</span></div>`;
+  if(!list.length) return seg+`<div class="panel"><div class="empty">${state.q||state.smStatus!=="all"?"該当する蕎麦前がありません。":"蕎麦前の品目がまだありません。<br><br>右上の「＋ 蕎麦前を追加」から、分類・材料・作り方・試食評価とともに登録できます。"}</div></div>`;
+  return seg+`<div class="mgrid">${list.map(sobamaeCard).join("")}</div>`;
+}
+function sobamaeCard(s){
+  const photos=s.photos||[];const ings=(s.ingredients||[]).filter(i=>i.name);
+  return `<div class="mcard" data-open-sm="${s.id}">
+    ${photos.length?coverHtml(photos):""}
+    <div class="top" style="align-items:center;gap:8px"><h3 style="flex:1">${esc(s.name)}</h3><span class="pill sm-${s.status}">${s.status||"検討中"}</span></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      ${s.category?`<span class="chip">${esc(s.category)}</span>`:""}
+      ${s.rating?stars(s.rating):""}
+    </div>
+    ${ings.length?`<div class="ing-line">${esc(ingSummary(ings))}</div>`:""}
+    ${s.memo?`<div class="mdesc">${esc(s.memo)}</div>`:""}
+    <div class="foot">
+      <span class="g">${fileIcon({kind:"file",contentType:""})}${ings.length} 材料</span>
+      ${photos.length?`<span class="g"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>${photos.length}枚</span>`:""}
+      <span class="g" style="margin-left:auto">${fmtWhen(s.updatedAt||s.createdAt)}</span>
+    </div>
+  </div>`;
+}
+function openSobamaeForm(id){
+  const s=id?state.sobamae.find(x=>x.id===id):null;
+  let ings = s&&s.ingredients&&s.ingredients.length ? s.ingredients.map(i=>({...i})) : [{name:"",amount:"",unit:""}];
+  let rating=s?s.rating||0:0;
+  let staged=[]; let existing=s?(s.photos||[]).map(p=>({...p,del:false})):[];
+  openModal(`<div class="modal wide"><div class="modal-head"><div style="flex:1"><div class="eb" style="color:var(--gold-ink);font-size:11px;font-weight:700;letter-spacing:.08em">SOBA-MAE</div><h2>${s?"蕎麦前を編集":"蕎麦前を追加"}</h2></div><button class="x">×</button></div>
+  <div class="modal-body">
+    <div class="field"><label>品目名 *</label><input id="sm-name" value="${s?esc(s.name):""}" placeholder="例）そばがき 揚げ出し"></div>
+    <div class="field"><div class="row">
+      <div><label>分類</label><input id="sm-cat" list="sm-cats" value="${s?esc(s.category||""):""}" placeholder="例）揚げ物"><datalist id="sm-cats">${SM_CATS.map(c=>`<option value="${c}"></option>`).join("")}</datalist></div>
+      <div><label>ステータス</label><select id="sm-status">${SM_STATUS.map(st=>`<option ${((s&&s.status)||"検討中")===st?"selected":""}>${st}</option>`).join("")}</select></div>
+    </div></div>
+    <div class="field"><label>材料</label><div id="sm-ing">${ings.map(ingRowHtml).join("")}</div>
+      <button class="btn sm" id="sm-add-ing" style="margin-top:2px">＋ 材料を追加</button>
+    </div>
+    <div class="field"><label>作り方 <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="sm-method" placeholder="下ごしらえ・工程・提供方法など">${s?esc(s.method||""):""}</textarea></div>
+    <div class="field"><label>試食評価</label><div class="rate-pick" id="sm-rate">${[1,2,3,4,5].map(n=>`<span class="s ${n<=rating?"on":""}" data-n="${n}">★</span>`).join("")}</div></div>
+    <div class="field"><label>試食メモ <span style="color:var(--faint);font-weight:400">任意</span></label><textarea id="sm-memo" placeholder="味・食感・盛り付け・改善点・提供時の注意など">${s?esc(s.memo||""):""}</textarea></div>
+    <div class="field"><label>写真 <span style="color:var(--faint);font-weight:400">任意</span></label>
+      <div class="trial-photos" id="sm-ph"></div>
+      <input type="file" id="sm-ph-input" accept="image/*" multiple hidden>
+      <div class="hint">盛り付け・断面などの記録に。複数枚OK（1枚25MBまで）。</div>
+    </div>
+  </div>
+  <div class="modal-foot">${s?`<button class="btn danger" id="sm-del" style="margin-right:auto">削除</button>`:""}<button class="btn" id="c">キャンセル</button><button class="btn pri" id="save">${s?"更新":"登録する"}</button></div></div>`);
+  $("#sm-name").focus();
+  const list=$("#sm-ing");
+  function wireRows(){list.querySelectorAll(".del").forEach(b=>b.onclick=()=>{if(list.querySelectorAll(".ing-row").length>1)b.closest(".ing-row").remove();else b.closest(".ing-row").querySelectorAll("input").forEach(i=>i.value="");});}
+  function collectIngs(){return [...list.querySelectorAll(".ing-row")].map(r=>({name:r.querySelector(".ing-name").value.trim(),amount:r.querySelector(".ing-amt").value.trim(),unit:r.querySelector(".ing-unit").value.trim()})).filter(i=>i.name||i.amount);}
+  wireRows();
+  $("#sm-add-ing").onclick=()=>{list.insertAdjacentHTML("beforeend",ingRowHtml({name:"",amount:"",unit:""}));wireRows();};
+  $("#sm-rate").querySelectorAll(".s").forEach(x=>x.onclick=()=>{rating=+x.dataset.n===rating?0:+x.dataset.n;$("#sm-rate").querySelectorAll(".s").forEach(y=>y.classList.toggle("on",+y.dataset.n<=rating));});
+  function renderPhotos(){
+    const g=$("#sm-ph");let h="";
+    existing.forEach((p,i)=>{h+=`<div class="tp ${p.del?"gone":""}"><a href="/file/${p.id}" target="_blank" rel="noopener"><img src="/file/${p.id}" alt=""></a><button class="rm" data-ex="${i}" title="${p.del?"戻す":"削除"}">${p.del?"↺":"×"}</button></div>`;});
+    staged.forEach((st,i)=>{h+=`<div class="tp"><img src="${st.url}" alt=""><button class="rm" data-st="${i}" title="取り消し">×</button></div>`;});
+    h+=`<button type="button" class="ph-add" id="sm-ph-add">＋<br>写真</button>`;
+    g.innerHTML=h;
+    g.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{existing[+b.dataset.ex].del=!existing[+b.dataset.ex].del;renderPhotos();});
+    g.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const i=+b.dataset.st;URL.revokeObjectURL(staged[i].url);staged.splice(i,1);renderPhotos();});
+    $("#sm-ph-add").onclick=()=>$("#sm-ph-input").click();
+  }
+  $("#sm-ph-input").onchange=()=>{
+    for(const f of $("#sm-ph-input").files){ if(!(f.type||"").startsWith("image")){toast("画像を選んでください");continue;} if(f.size>25*1048576){toast("25MBを超えています");continue;} staged.push({file:f,url:URL.createObjectURL(f)}); }
+    $("#sm-ph-input").value="";renderPhotos();
+  };
+  renderPhotos();
+  $("#c").onclick=closeModal;
+  if(s)$("#sm-del").onclick=async()=>{if(confirm("この蕎麦前と写真を削除しますか？")){try{await api("DELETE","/sobamae/"+s.id);await reload();closeModal();render();toast("削除しました");}catch(e){toast("エラー: "+e.message);}}};
+  $("#save").onclick=async()=>{
+    const name=$("#sm-name").value.trim();if(!name){$("#sm-name").focus();return;}
+    const payload={id:s?s.id:undefined,name,category:$("#sm-cat").value.trim(),ingredients:collectIngs(),
+      method:$("#sm-method").value.trim(),status:$("#sm-status").value,rating,memo:$("#sm-memo").value.trim()};
+    if(!await ensureMe())return;payload.by=state.me;
+    const btn=$("#save");btn.disabled=true;btn.textContent="保存中…";
+    try{
+      let sid;
+      if(s){ await api("POST","/sobamae",payload); sid=s.id; }
+      else { const r=await api("POST","/sobamae",payload); sid=r.id; }
+      for(const st of staged){ const fd=new FormData();fd.append("file",st.file);fd.append("name",st.file.name);fd.append("by",state.me);if(st.file.type)fd.append("contentType",st.file.type); await api("POST","/sobamae/"+sid+"/files",fd,true); URL.revokeObjectURL(st.url); }
+      for(const p of existing.filter(x=>x.del)) await api("DELETE","/files/"+p.id);
+      await reload();closeModal();render();toast(s?"更新しました":"蕎麦前を追加しました");
+    }catch(e){toast("エラー: "+e.message);btn.disabled=false;btn.textContent=s?"更新":"登録する";}
+  };
 }
 </script>
 </body>
